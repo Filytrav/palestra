@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Palestra</title>
+<meta name="theme-color" content="#E3E5E1">
+<meta name="description" content="Scheda di allenamento, dieta e lista della spesa">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Palestra">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="app"></main>
+
+<div id="timer" hidden>
+  <span class="t-num">0:00</span>
+  <span class="t-lab">Recupero</span>
+  <button class="tb" data-act="tadd">+15 s</button>
+  <button class="tb" data-act="tstop">Salta</button>
+  <i class="bar"></i>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<nav class="tabbar" aria-label="Sezioni">
+  <button data-act="tab" data-tab="oggi" aria-current="page">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="1.6"/></svg>Oggi
+  </button>
+  <button data-act="tab" data-tab="scheda" aria-current="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Scheda
+  </button>
+  <button data-act="tab" data-tab="dieta" aria-current="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11h17a8.5 8.5 0 0 1-17 0z"/><path d="M9 7c0-1.5 1.5-1.5 1.5-3M14 7c0-1.5 1.5-1.5 1.5-3"/></svg>Dieta
+  </button>
+  <button data-act="tab" data-tab="spesa" aria-current="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h3l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20.5 8H7"/><circle cx="10" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg>Spesa
+  </button>
+  <button data-act="tab" data-tab="storico" aria-current="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 19.5h17M5 15l4.5-5 3.5 3L19 6"/></svg>Storico
+  </button>
+</nav>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

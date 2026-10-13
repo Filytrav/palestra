@@ -37,8 +37,14 @@ const defaults = () => ({
   toppings: {},
   shop: { bought: {}, have: {} },
   weights: [{ d: D.diet.start, kg: D.diet.startWeight }],
-  settings: { rest: 90 }
+  settings: { rest: 90, theme: 'apple' }
 });
+
+function todayQuick() {
+  const d = dayRec(todayKey());
+  d.quick ||= { creatina: false, colazione: false, pranzo: false, cena: false };
+  return d.quick;
+}
 
 function load() {
   const base = defaults();
@@ -46,7 +52,7 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const s = Object.assign(base, JSON.parse(raw));
-      s.settings = Object.assign({ rest: 90 }, s.settings);
+      s.settings = Object.assign({ rest: 90, theme: 'apple' }, s.settings);
       s.shop = Object.assign({ bought: {}, have: {} }, s.shop);
       return s;
     }
@@ -65,7 +71,7 @@ const ui = { tab: 'oggi', dietView: 'train', exId: null };
 /* ---------- giorno corrente ---------- */
 function dayRec(k) {
   const d = S.days[k] || (S.days[k] = {});
-  d.sets ||= {}; d.meals ||= {}; d.names ||= {}; d.count ||= {};
+  d.sets ||= {}; d.meals ||= {}; d.names ||= {}; d.count ||= {}; d.quick ||= { creatina: false, colazione: false, pranzo: false, cena: false };
   return d;
 }
 const getSets = (k, exId) => S.days[k]?.sets?.[exId] || [];
@@ -235,27 +241,74 @@ function workoutBlock(k) {
   const done = w.exercises.reduce((a, ex) => a + getSets(k, ex.id).filter(s => s && s.done).length, 0);
   const auto = !S.days[k]?.wid && done === 0;
   return `<section class="workout ${colorClass(w)}">
+    <div class="workout-hero">
+      <div>
+        <span class="pill">${esc(DAYS_FULL[wdIndex(fromKey(k))])}</span>
+        <h2>${esc(w.name)}</h2>
+      </div>
+      <div class="mini-stat" data-prog>
+        <strong>${done}</strong>
+        <span>/${total}</span>
+      </div>
+    </div>
     <div class="chips" role="group" aria-label="Giorno di scheda">${chips}</div>
-    <div class="wk-head"><h2>${esc(w.name)}</h2><p class="prog" data-prog>${done} di ${total} serie</p></div>
     ${auto ? '<p class="sub tight">È il prossimo in rotazione. Tocca un altro giorno per cambiarlo.</p>' : ''}
     ${w.exercises.map(ex => exHtml(k, ex)).join('')}
     <label class="notes"><span>Note dell'allenamento</span><textarea data-inp="note" rows="2">${esc(S.days[k]?.note || '')}</textarea></label>
   </section>`;
 }
 
+function renderIntro() {
+  const k = todayKey();
+  const q = todayQuick();
+  return `<header class="top intro-head"><h1>Oggi</h1></header>
+    <section class="intro-panel">
+      <p class="intro-kicker">Stato della giornata</p>
+      <h2>${fmtLong(new Date())}</h2>
+      <p class="intro-copy">Sei in palestra oggi o preferisci una giornata di riposo?</p>
+      <div class="intro-actions">
+        <button class="intro-choice ${dayType(k) === 'train' ? 'on' : ''}" data-intro="train">Gym day</button>
+        <button class="intro-choice ${dayType(k) === 'rest' ? 'on' : ''}" data-intro="rest">Rest day</button>
+      </div>
+      <div class="intro-toggles">
+        <button class="mini-toggle ${q.creatina ? 'on' : ''}" data-quick="creatina">Creatina</button>
+        <button class="mini-toggle ${q.colazione ? 'on' : ''}" data-quick="colazione">Colazione</button>
+        <button class="mini-toggle ${q.pranzo ? 'on' : ''}" data-quick="pranzo">Pranzo</button>
+        <button class="mini-toggle ${q.cena ? 'on' : ''}" data-quick="cena">Cena</button>
+      </div>
+      <p class="sub tight">Questa scelta verrà salvata per oggi e puoi cambiarla in qualsiasi momento dalla home.</p>
+    </section>`;
+}
+
 function renderOggi() {
   const k = todayKey();
   const type = dayType(k);
   const segBtn = (v, label) => `<button class="${type === v ? 'on' : ''}" data-act="type" data-v="${v}" aria-pressed="${type === v}">${label}</button>`;
+  const q = todayQuick();
+  const quickHtml = `
+    <div class="quick-row">
+      <button class="mini-toggle ${q.creatina ? 'on' : ''}" data-quick="creatina">Creatina</button>
+      <button class="mini-toggle ${q.colazione ? 'on' : ''}" data-quick="colazione">Colazione</button>
+      <button class="mini-toggle ${q.pranzo ? 'on' : ''}" data-quick="pranzo">Pranzo</button>
+      <button class="mini-toggle ${q.cena ? 'on' : ''}" data-quick="cena">Cena</button>
+    </div>`;
+  const stateText = type === 'train'
+    ? `Allenamento oggi · ${workoutFor(k).name}`
+    : `Riposo oggi${nextTrain() ? ` · Prossimo allenamento: ${nextTrain()}` : ''}`;
   let body;
   if (type === 'train') {
     body = workoutBlock(k);
   } else {
     const nx = nextTrain();
-    body = `<p class="rest-note">Giorno di riposo.${nx ? ` Il prossimo allenamento è ${nx}.` : ''}</p>`;
+    body = `<div class="home-state rest"><strong>Riposo</strong><span>${nx ? `Il prossimo allenamento è ${nx}.` : 'Giornata di recupero.'}</span></div>
+      <p class="rest-note">Giorno di riposo.${nx ? ` Il prossimo allenamento è ${nx}.` : ''}</p>`;
   }
-  return `<header class="top"><h1>${fmtLong(new Date())}</h1></header>
+  const badge = { apple: 'APPLE-LIKE', dark: 'DARK', sport: 'SPORT' }[S.settings.theme || 'apple'];
+  return `<div class="theme-tag">${badge}</div>
+    <header class="top"><h1>${fmtLong(new Date())}</h1></header>
     <div class="seg" role="group" aria-label="Tipo di giorno">${segBtn('train', 'Allenamento')}${segBtn('rest', 'Riposo')}</div>
+    <div class="home-state ${type === 'train' ? 'train' : 'rest'}"><strong>${type === 'train' ? 'Allenamento' : 'Riposo'}</strong><span>${stateText}</span></div>
+    ${quickHtml}
     ${body}
     <section class="meals">
       <h2>Pasti di oggi</h2>
@@ -418,8 +471,15 @@ function renderStorico() {
       <h2>Impostazioni e dati</h2>
       <label class="setting"><span>Recupero tra le serie</span>
         <select data-chg="rest" aria-label="Secondi di recupero">${[45, 60, 90, 120, 150, 180, 240].map(s => `<option value="${s}"${S.settings.rest === s ? ' selected' : ''}>${s >= 60 ? Math.floor(s / 60) + ' min' + (s % 60 ? ' ' + (s % 60) + ' s' : '') : s + ' s'}</option>`).join('')}</select></label>
+      <label class="setting"><span>Stile app</span>
+        <select data-chg="theme" aria-label="Tema dell'app">
+          <option value="apple"${S.settings.theme === 'apple' ? ' selected' : ''}>Apple-like</option>
+          <option value="dark"${S.settings.theme === 'dark' ? ' selected' : ''}>Dark</option>
+          <option value="sport"${S.settings.theme === 'sport' ? ' selected' : ''}>Sport</option>
+        </select></label>
       <p class="sub tight">I dati restano su questo telefono. Salva ogni tanto un backup.</p>
       <div class="btns"><button class="btn" data-act="export">Esporta il backup</button>
+        <button class="btn" data-act="preview">Anteprima stili</button>
         <label class="btn">Importa un backup<input type="file" accept="application/json,.json" data-chg="import" hidden></label>
         <button class="btn danger" data-act="reset">Cancella tutto</button></div>
     </section>`;
@@ -432,6 +492,16 @@ let renderedDay = todayKey();
 function render(keep) {
   const y = window.scrollY || 0;
   renderedDay = todayKey();
+  document.body.classList.remove('theme-apple', 'theme-dark', 'theme-sport');
+  document.body.classList.add(`theme-${S.settings.theme || 'apple'}`);
+  const d = dayRec(todayKey());
+  const introNeeded = ui.tab === 'oggi' && !d.introDone && !d.type;
+  if (introNeeded) {
+    $('#app').innerHTML = renderIntro();
+    $$('.tabbar button').forEach(b => b.setAttribute('aria-current', 'false'));
+    try { window.scrollTo(0, 0); } catch (e) { /* ambienti senza scroll */ }
+    return;
+  }
   $('#app').innerHTML = screens[ui.tab]();
   $$('.tabbar button').forEach(b => b.setAttribute('aria-current', b.dataset.tab === ui.tab ? 'page' : 'false'));
   try { window.scrollTo(0, keep ? y : 0); } catch (e) { /* ambienti senza scroll */ }
@@ -490,7 +560,9 @@ document.addEventListener('visibilitychange', () => {
 /* ---------- azioni (click) ---------- */
 const A = {
   tab(el) { ui.tab = el.dataset.tab; render(false); },
-  type(el) { dayRec(todayKey()).type = el.dataset.v; save(); render(true); },
+  type(el) { const d = dayRec(todayKey()); d.type = el.dataset.v; d.introDone = true; save(); render(true); },
+  intro(el) { const d = dayRec(todayKey()); d.type = el.dataset.intro; d.introDone = true; save(); render(false); },
+  quick(el) { const d = dayRec(todayKey()); d.quick ||= {}; d.quick[el.dataset.quick] = !d.quick[el.dataset.quick]; save(); render(true); },
   wid(el) { const d = dayRec(todayKey()); d.wid = el.dataset.id; save(); render(true); },
   dview(el) { ui.dietView = el.dataset.v; render(true); },
 
@@ -547,6 +619,14 @@ const A = {
     if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(ok, () => toast('Copia non riuscita'));
     else toast('Copia non disponibile su questo browser');
   },
+  preview() {
+    const url = 'preview-home.html';
+    if (window.open) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      location.href = url;
+    }
+  },
 
   wsave() {
     const v = num($('#w-in').value);
@@ -591,6 +671,10 @@ const C = {
   topping(el) { S.toppings[el.dataset.item] = el.value; save(); render(true); },
   exsel(el) { ui.exId = el.value; render(true); },
   rest(el) { S.settings.rest = +el.value; save(); },
+  theme(el) {
+    S.settings.theme = ['apple', 'dark', 'sport'].includes(el.value) ? el.value : 'apple';
+    save(); render(true);
+  },
   ex(el) {
     const row = el.closest('.erow'), ex = S.workouts[+row.dataset.w].exercises[+row.dataset.e];
     const f = el.dataset.f, v = el.value.trim();
@@ -628,7 +712,14 @@ const I = {
   note(el) { dayRec(todayKey()).note = el.value; save(); }
 };
 
-document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && A[el.dataset.act]) A[el.dataset.act](el, e); });
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (el && A[el.dataset.act]) A[el.dataset.act](el, e);
+  const quick = e.target.closest('[data-quick]');
+  if (quick && A.quick) A.quick(quick, e);
+  const intro = e.target.closest('[data-intro]');
+  if (intro && A.intro) A.intro(intro, e);
+});
 document.addEventListener('change', e => { const el = e.target.closest('[data-chg]'); if (el && C[el.dataset.chg]) C[el.dataset.chg](el, e); });
 document.addEventListener('input', e => { const el = e.target.closest('[data-inp]'); if (el && I[el.dataset.inp]) I[el.dataset.inp](el, e); });
 

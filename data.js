@@ -168,5 +168,333 @@ window.APP_DATA = (() => {
     }
   ];
 
-  return { cats, food, toppings, diet, workouts };
+
+  // ---- v1.5 ----
+  // Gruppi muscolari (per il grafico dei gruppi allenati)
+  const groups = [
+    ['petto', 'Petto'], ['dorso', 'Dorso'], ['spalle', 'Spalle'], ['bicipiti', 'Bicipiti'],
+    ['tricipiti', 'Tricipiti'], ['gambe', 'Gambe'], ['addome', 'Addome'], ['altro', 'Altro']
+  ];
+  const exGroup = {
+    panca: 'petto', pectoral: 'petto', lat: 'dorso', rowbassa: 'dorso', pressa: 'gambe',
+    bicbil: 'bicipiti', biccavi: 'bicipiti', tribil: 'tricipiti', tricavi: 'tricipiti',
+    legcurl: 'gambe', addom: 'addome', spalle: 'spalle', alzate: 'spalle', rowlarga: 'dorso', schiena: 'dorso'
+  };
+  // Esercizi della scheda che hanno più varianti (con pesi separati per ciascuna)
+  const variantDefs = {
+    pectoral: [{ id: 'machine', name: 'Pectoral machine' }, { id: 'croci', name: 'Croci' }],
+    lat: [{ id: 'dorsali', name: 'Dorsali' }, { id: 'latmachine', name: 'Lat machine presa larga' }],
+    spalle: [{ id: 'multipower', name: 'Spalle Multipower', kg: 14 }, { id: 'rack', name: 'Panca al rack', kg: 12 }]
+  };
+  // Dati di base importati dal backup del 13/10/2026
+  const seed = {
+   "v": 1,
+   "workouts": [
+    {
+     "id": "g1",
+     "name": "Giorno 1",
+     "color": "red",
+     "exercises": [
+      {
+       "id": "panca",
+       "name": "Panca",
+       "sets": 5,
+       "reps": 5,
+       "kg": 40
+      },
+      {
+       "id": "pectoral",
+       "name": "Pectoral machine / Croci",
+       "sets": 4,
+       "reps": 10,
+       "kg": 10
+      },
+      {
+       "id": "lat",
+       "name": "Dorsali / Lat machine presa larga",
+       "sets": 5,
+       "reps": 5,
+       "kg": 40
+      },
+      {
+       "id": "rowbassa",
+       "name": "Row presa bassa stretta",
+       "sets": 4,
+       "reps": 10,
+       "kg": 55
+      },
+      {
+       "id": "pressa",
+       "name": "Pressa",
+       "sets": 4,
+       "reps": 10,
+       "kg": 80
+      }
+     ]
+    },
+    {
+     "id": "g2",
+     "name": "Giorno 2",
+     "color": "blue",
+     "exercises": [
+      {
+       "id": "bicbil",
+       "name": "Bicipiti bilanciere",
+       "sets": 5,
+       "reps": 10,
+       "kg": 20
+      },
+      {
+       "id": "biccavi",
+       "name": "Bicipiti cavi",
+       "sets": 4,
+       "reps": 8,
+       "kg": 16
+      },
+      {
+       "id": "tribil",
+       "name": "Tricipiti bilanciere",
+       "sets": 5,
+       "reps": 5,
+       "kg": 18
+      },
+      {
+       "id": "tricavi",
+       "name": "Tricipiti cavi",
+       "sets": 4,
+       "reps": 10,
+       "kg": 16
+      },
+      {
+       "id": "legcurl",
+       "name": "Leg curl",
+       "sets": null,
+       "reps": null,
+       "kg": null
+      },
+      {
+       "id": "addom",
+       "name": "Addominali",
+       "sets": 4,
+       "reps": 10,
+       "kg": null
+      }
+     ]
+    },
+    {
+     "id": "g3",
+     "name": "Giorno 3",
+     "color": "gold",
+     "exercises": [
+      {
+       "id": "spalle",
+       "name": "Spalle Multipower / panca al rack",
+       "sets": 5,
+       "reps": 5,
+       "kg": 14,
+       "note": "Carico indicato in scheda: 14/12"
+      },
+      {
+       "id": "alzate",
+       "name": "Alzate laterali",
+       "sets": 5,
+       "reps": 12,
+       "kg": 6
+      },
+      {
+       "id": "rowlarga",
+       "name": "Row presa larga",
+       "sets": 5,
+       "reps": 12,
+       "kg": 50
+      },
+      {
+       "id": "schiena",
+       "name": "Schiena",
+       "sets": null,
+       "reps": null,
+       "kg": null
+      }
+     ]
+    }
+   ],
+   "week": [
+    "rest",
+    "train",
+    "rest",
+    "train",
+    "rest",
+    "train",
+    "rest"
+   ],
+   "days": {
+    "2026-10-13": {
+     "sets": {
+      "panca": [
+       {
+        "kg": 45,
+        "reps": 5,
+        "done": true
+       },
+       {
+        "kg": 42.5,
+        "reps": 5,
+        "done": true
+       },
+       {
+        "kg": 40,
+        "reps": 5,
+        "done": true
+       },
+       {
+        "kg": 40,
+        "reps": 5,
+        "done": true
+       },
+       {
+        "kg": 40,
+        "reps": 5,
+        "done": true
+       }
+      ],
+      "pectoral": [
+       {
+        "kg": 35,
+        "reps": 10,
+        "done": true
+       },
+       {
+        "kg": 35,
+        "reps": 9,
+        "done": true
+       },
+       {
+        "kg": 30,
+        "reps": 10,
+        "done": true
+       },
+       {
+        "kg": 30,
+        "reps": 10,
+        "done": true
+       }
+      ],
+      "lat": [
+       {
+        "kg": 50,
+        "reps": 5,
+        "done": true
+       },
+       {
+        "kg": 45,
+        "reps": 5,
+        "done": true
+       },
+       {
+        "kg": 40,
+        "reps": 5,
+        "done": true
+       },
+       {
+        "kg": 40,
+        "reps": 5,
+        "done": true
+       },
+       {
+        "kg": 40,
+        "reps": 5,
+        "done": true
+       }
+      ],
+      "rowbassa": [
+       {
+        "kg": 55,
+        "reps": 8,
+        "done": true
+       },
+       {
+        "kg": 50,
+        "reps": 10,
+        "done": true
+       },
+       {
+        "kg": 50,
+        "reps": 9,
+        "done": true
+       },
+       {
+        "kg": 50,
+        "reps": 7,
+        "done": true
+       }
+      ],
+      "pressa": [
+       {
+        "kg": 80,
+        "reps": 10,
+        "done": true
+       },
+       {
+        "kg": 80,
+        "reps": 10,
+        "done": true
+       },
+       {
+        "kg": 80,
+        "reps": 10,
+        "done": true
+       },
+       {
+        "kg": 80,
+        "reps": 10,
+        "done": true
+       }
+      ]
+     },
+     "meals": {
+      "colazione": true,
+      "pranzo": true
+     },
+     "names": {
+      "panca": "Panca",
+      "pectoral": "Pectoral machine / Croci",
+      "lat": "Dorsali / Lat machine presa larga",
+      "rowbassa": "Row presa bassa stretta",
+      "pressa": "Pressa"
+     },
+     "count": {
+      "pressa": 4
+     },
+     "quick": {
+      "creatina": false,
+      "colazione": true,
+      "pranzo": false,
+      "cena": false
+     },
+     "type": "train",
+     "introDone": true,
+     "wid": "g1"
+    }
+   },
+   "choices": {
+    "t-pranzo-carne": "hamburger"
+   },
+   "toppings": {},
+   "shop": {
+    "bought": {},
+    "have": {}
+   },
+   "weights": [
+    {
+     "d": "2026-10-09",
+     "kg": 68.5
+    }
+   ],
+   "settings": {
+    "rest": 60,
+    "theme": "apple"
+   }
+  };
+
+  return { cats, food, toppings, diet, workouts, groups, exGroup, variantDefs, seed };
 })();

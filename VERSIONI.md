@@ -3,7 +3,62 @@
 > **Nota: ad ogni aggiornamento della app, aggiornare questo file.**
 > Aggiungi in cima una nuova sezione con numero di versione, data e l'elenco di cosa è stato aggiunto, cambiato o corretto. Le versioni più recenti stanno in alto.
 
-Versione attuale: **1.0**
+Versione attuale: **1.5**
+
+---
+
+## Versione 1.5 (14/10/2026)
+
+Home a due bottoni, selettore degli esercizi con varianti, sezione Progressi con grafici e gruppi muscolari. I dati salvati nelle versioni 1.0 e 1.1 si conservano: la app li aggiorna da sola al primo avvio.
+
+### Home
+- Schermata iniziale con due bottoni grandi, Allenamento e Dieta, separati e senza scorrimento: restano interi anche sugli schermi piccoli.
+- Ogni bottone mostra l'avanzamento di oggi (serie fatte su totali, pasti fatti su totali) e porta alla sua schermata, con freccia per tornare indietro. Funziona anche il gesto o il tasto indietro del telefono.
+- Layout e stile uguali all'anteprima della 1.1 (stile Apple-like di partenza, Scuro e Sport restano disponibili).
+- "Segna al volo" resta sotto i bottoni: Creatina e i pasti del giorno.
+- Il timer di recupero compare solo nella schermata Allenamento, così non copre home e grafici.
+- Se oggi è riposo il bottone Allenamento è spento; per allenarti comunque tocca Allenamento nel selettore in alto.
+
+### Allenamento: selettore degli esercizi
+- Gli esercizi con più alternative hanno un selettore a due voci, con il peso di ciascuna: Pectoral machine / Croci, Dorsali / Lat machine presa larga, Spalle Multipower / Panca al rack.
+- Ogni variante ha i suoi pesi, il suo "ultima volta", il suo massimo e il suo storico. Le serie già registrate di Pectoral machine, Dorsali e Spalle Multipower sono state assegnate alla prima variante.
+- Il peso che compare in ogni serie parte dall'ultimo usato con quell'esercizio.
+- In Scheda si possono aggiungere ed eliminare varianti e dare a ciascuna serie, ripetizioni e kg.
+- In Scheda ogni esercizio ha il suo gruppo muscolare (Petto, Dorso, Spalle, Bicipiti, Tricipiti, Gambe, Addome, Altro).
+
+### Storico: Progressi
+- Lo Storico ha tre sezioni: Progressi, Allenamenti, Dati.
+- Filtro per periodo: 7 giorni, 30 giorni, sempre. In alto: allenamenti, serie e volume del periodo.
+- Peso corporeo: grafico dell'andamento e inserimento del peso di oggi.
+- Esercizio: scegli l'esercizio (anche ogni singola variante) e guarda l'andamento di carico massimo, 1RM stimato, volume, ripetizioni o serie, con Migliore, Ultimo e Variazione.
+- Gruppi muscolari: grafico a barre dei gruppi allenati, per numero di serie o per volume.
+- Volume per allenamento: andamento dei chili sollevati seduta dopo seduta.
+- Toccando un punto o una barra si vede il dettaglio, e "Mostra i dati" apre la tabella dei valori.
+- Allenamenti: elenco delle sedute, con il dettaglio di ogni esercizio.
+- Dati: tempo di recupero, stile della app, esporta e importa il backup, ripristina i dati di base.
+
+### Dati di base dal tuo backup del 13/10/2026
+- Scheda aggiornata: Pectoral machine / Croci 4 serie da 10, Row presa bassa 4 serie da 10, Pressa 4 serie da 10 a 80 kg.
+- Allenamenti di martedì, giovedì e sabato; recupero di 1 minuto.
+- Allenamento del 13/10 con carichi e ripetizioni reali, pasti di quel giorno, peso di partenza 68,5 kg.
+- Compaiono quando la app parte senza dati, oppure con "Ripristina i dati di base".
+
+### Tecnico
+- Nuovo file `charts.js` (grafici in SVG, senza librerie). File della app: `index.html`, `style.css`, `data.js`, `charts.js`, `app.js`, `sw.js`, `manifest.webmanifest`, cartella `icons`.
+- Stessa chiave di salvataggio delle versioni precedenti (nessuna perdita di dati); i pasti segnati in due modi nella 1.1 sono stati uniti.
+- Copia offline aggiornata alla 1.5.
+- Provata con test automatici nel browser (Chromium) su schermi da 320 a 430 pixel di larghezza, con il file di backup caricato.
+
+---
+
+## Versione 1.1 (13/10/2026)
+
+Ricostruita dal backup. Nuova home "Oggi" e tre stili.
+
+- Home Oggi con scelta Allenamento o Riposo, scheda del giorno con riepilogo (giorno, serie fatte, prossima serie) e pasti con spunta.
+- "Segna al volo": Creatina, Colazione, Pranzo e Cena.
+- Tre stili selezionabili: Apple-like, Scuro e Sport.
+- Anteprima della home (`preview-home.html`) usata per scegliere il layout.
 
 ---
 

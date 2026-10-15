@@ -46,7 +46,8 @@ function line(o) {
   const xs = pts.map(p => dayNum(p.d));
   const x0 = Math.min(...xs), x1 = Math.max(...xs);
   const X = v => (x1 === x0 ? L + pw / 2 : L + pad + (v - x0) * (pw - 2 * pad) / (x1 - x0));
-  const ys = pts.map(p => p.y);
+  const tr = (o.trend || []).filter(p => p && Number.isFinite(p.y));
+  const ys = pts.map(p => p.y).concat(tr.map(p => p.y));
   const nt = niceTicks(Math.min(...ys), Math.max(...ys), 4, o.integer);
   const Y = v => T + ph - (v - nt.min) * ph / (nt.max - nt.min);
   const P = pts.map((p, i) => ({ x: +X(xs[i]).toFixed(1), y: +Y(p.y).toFixed(1), f: fmtV(p.y), d: lab(p.d), t: p.tip || '' }));
@@ -75,6 +76,7 @@ function line(o) {
 
   const path = P.map((p, i) => `${i ? 'L' : 'M'}${p.x} ${p.y}`).join(' ');
   const area = P.length > 1 ? `<path class="vz-area" d="M${P[0].x} ${base} ${P.map(p => `L${p.x} ${p.y}`).join(' ')} L${P[P.length - 1].x} ${base} Z"/>` : '';
+  const trendPath = tr.length > 1 ? `<path class="vz-trend" d="${tr.map((p, i) => `${i ? 'L' : 'M'}${X(dayNum(p.d)).toFixed(1)} ${Y(p.y).toFixed(1)}`).join(' ')}"/>` : '';
   const line2 = P.length > 1 ? `<path class="vz-line" d="${path}"/>` : '';
   const dots = (P.length <= 30 ? P : [P[P.length - 1]]).map(p => `<circle class="vz-dot" cx="${p.x}" cy="${p.y}" r="4"/>`).join('');
   const lp = P[P.length - 1];
@@ -87,7 +89,7 @@ function line(o) {
   return `<figure class="vz" data-vz="line">
     <div class="vz-read" aria-live="polite"><i class="vz-key"></i><b data-r="f">${esc(lp.f)}</b><span data-r="d">${esc(lp.d)}</span><span data-r="t">${esc(lp.t)}</span></div>
     <svg class="vz-svg" viewBox="0 0 ${W} ${H}" role="img" tabindex="0" aria-label="${esc(label)}: ${esc(P[0].d)} ${esc(P[0].f)}, ${esc(lp.d)} ${esc(lp.f)}" data-i="${P.length - 1}" data-pts="${esc(JSON.stringify(P))}">
-      ${grid}${xlab}${area}${line2}
+      ${grid}${xlab}${area}${trendPath}${line2}
       <line class="vz-cross" x1="0" x2="0" y1="${T}" y2="${base}" style="display:none"/>
       ${dots}
       <circle class="vz-hl" r="6" cx="0" cy="0" style="display:none"/>

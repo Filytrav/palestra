@@ -1,4 +1,4 @@
-/* Palestra 1.6
+/* Palestra 1.7
    Il layout riprende l'anteprima della home (tema Apple-like): data, selettore Allenamento/Riposo,
    scheda riepilogo con punteggio, esercizi con bordo colorato, pasti a righe e barra in basso.
    I colori cambiano con il tema scelto in Storico, Dati (apple, dark, sport). */
@@ -16,6 +16,8 @@ body, .pv {
   --green-soft: #dff5ea;
   --red: #d6544d;
   --red-soft: #fbe2df;
+  --amber: #9a5b00;
+  --amber-soft: #fdebd0;
   --gold: #c99722;
   --blue: #2c6bc7;
   --shadow: 0 12px 32px rgba(20, 30, 38, 0.08);
@@ -56,6 +58,8 @@ body.theme-dark, .pv.theme-dark {
   --green-soft: rgba(31, 157, 96, 0.2);
   --red: #f06d63;
   --red-soft: rgba(240, 109, 99, 0.18);
+  --amber: #f0b050;
+  --amber-soft: rgba(240, 176, 80, 0.18);
   --blue: #7db6ff;
   --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
   --hero: rgba(255, 255, 255, 0.06);
@@ -438,3 +442,31 @@ body.theme-dark .btn.solid { background: var(--accent); }
   .plate.done::after { animation: none; }
   #toast, .vz-bar { transition: none; }
 }
+
+
+/* ---- 1.7: pasti saltati e sgarri, corpo libero, note, promemoria, domanda del giorno ---- */
+.mflags { display: flex; gap: 8px; border-top: 1px solid var(--line); padding-top: 8px; }
+.mflag { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--field-line); background: var(--chip); font-weight: 700; font-size: .9rem; color: var(--muted); }
+.mflag.on.skip { background: var(--red-soft); border-color: var(--red); color: var(--red); }
+.mflag.on.slip { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+.slipin, .exnote { display: block; width: 100%; min-height: 44px; margin-top: 8px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--field-line); background: var(--field); font-size: .95rem; font-weight: 600; }
+.meal-card.skip .items { opacity: .55; }
+.mini-toggle.skip { border-color: var(--red); color: var(--red); background: var(--red-soft); }
+.mini-toggle.slip { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+.field.fixed { justify-content: center; }
+.field.fixed b { font-size: 1.05rem; font-weight: 800; padding-right: 30px; }
+.exnote { margin: 4px 0 2px; }
+.banner { background: var(--hero); border: 1px solid var(--line); border-radius: 18px; padding: 12px 14px 8px; margin: 10px 0; }
+.banner p { font-weight: 700; font-size: .95rem; }
+.banner .btns { margin: 8px 0 0; }
+.trend-note { display: flex; align-items: center; gap: 8px; }
+.trend-key { width: 18px; height: 0; border-top: 2px dashed var(--muted); flex: 0 0 auto; }
+.vz-trend { fill: none; stroke: var(--muted); stroke-width: 2; stroke-dasharray: 5 4; stroke-linecap: round; stroke-linejoin: round; }
+.sheet-wrap { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; background: rgba(0, 0, 0, 0.42); }
+.sheet { width: 100%; max-width: 520px; background: var(--bg-end); border-radius: 24px 24px 0 0; padding: 20px 16px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25); }
+.sheet h2 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.04em; }
+.sheet-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 4px; }
+.sheet-btns .btn { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 56px; font-size: 1.05rem; }
+.sheet-btns .btn small { font-size: .72rem; font-weight: 700; opacity: .85; }
+.sheet .lnk { display: block; margin: 6px auto 0; }
+.sess li .exn { display: block; flex-basis: 100%; color: var(--muted); font-weight: 600; font-size: .85rem; }

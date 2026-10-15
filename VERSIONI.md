@@ -3,7 +3,38 @@
 > **Nota: ad ogni aggiornamento della app, aggiornare questo file.**
 > Aggiungi in cima una nuova sezione con numero di versione, data e l'elenco di cosa è stato aggiunto, cambiato o corretto. Le versioni più recenti stanno in alto.
 
-Versione attuale: **1.6**
+Versione attuale: **1.7**
+
+---
+
+## Versione 1.7 (15/10/2026)
+
+Pasti saltati e sgarri, esercizi a corpo libero con zavorra, note, promemoria del backup, tendenza del peso e domanda sul giorno all'apertura. I dati della 1.6 si conservano.
+
+### Dieta
+- Ogni pasto ha due tasti, "Saltato" e "Sgarro". Lo sgarro conta come mangiato ma fuori piano e ha una nota facoltativa ("tiramisù"). Il saltato conta come non mangiato.
+- Spuntare un pasto saltato toglie il "Saltato"; togliere la spunta a uno sgarro toglie lo sgarro.
+- Nella home il pasto saltato non compare più come "prossimo" e il suo tasto cambia colore (rosso per saltato, giallo per sgarro).
+- Aderenza: i pasti "seguiti" sono quelli mangiati senza sgarri, rispetto a quelli previsti. Saltati e sgarri sono contati a parte.
+- Controllo: la riga "Fuori piano" nelle settimane, e nel riepilogo copiabile le righe "Pasti: ..., 1 sgarro, 1 saltato" e l'elenco "Sgarri" con data, pasto e nota.
+- CSV dei pasti: valori Sì, No, Saltato, Sgarro e una colonna con le note sugli sgarri.
+
+### Allenamento
+- Esercizi a corpo libero: in Scheda, per ogni esercizio, "Carico" può essere Pesi, Peso corporeo oppure Peso corporeo + zavorra.
+- Peso corporeo: il peso è l'ultimo che hai registrato fino a quel giorno e resta salvato nella serie, quindi gli allenamenti passati non cambiano se il peso sale. Con "+ zavorra" scrivi solo i chili aggiunti.
+- Record, volumi, grafici ed esportazione usano il carico totale (corpo + zavorra). Il CSV delle serie ha la nuova colonna "Zavorra (kg)".
+- Nota per esercizio: sotto le serie di ogni esercizio un campo di testo. La volta dopo, sopra le serie, compare l'ultima nota. Le note si vedono anche in Storico, Sedute, e nel CSV delle serie.
+
+### Home e dati
+- Domanda del giorno: alla prima apertura di ogni giorno una finestra chiede se oggi è allenamento o riposo, con il tipo previsto dalla settimana evidenziato. "Decido dopo" o Esc la chiudono. Non ricompare lo stesso giorno.
+- Promemoria del backup: se non salvi un backup da 7 giorni (o non lo hai mai fatto e usi la app da 7 giorni) compare un avviso nella home, con "Salva il backup" e "Più tardi" (nasconde per 3 giorni). In Storico, Dati si vede la data dell'ultimo backup.
+- Tendenza del peso: sul grafico una linea tratteggiata con la media degli ultimi 7 giorni, e sotto la variazione rispetto a una settimana prima. Compare dal terzo peso registrato.
+
+### Non fatto
+- Scorta in casa nella spesa: c'era già ("Ho già" nella lista, e le spunte "Preso").
+
+### Tecnico
+- Nuovi campi nei giorni salvati (flags, slip, exnote) e nell'esercizio (bw), migrazione automatica. Impostazioni: lastBackup, backupSnooze, dayAsked. Cache palestra-v1.7.
 
 ---
 

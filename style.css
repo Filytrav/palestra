@@ -1,11 +1,11 @@
-/* Palestra 1.5
+/* Palestra 1.6
    Il layout riprende l'anteprima della home (tema Apple-like): data, selettore Allenamento/Riposo,
    scheda riepilogo con punteggio, esercizi con bordo colorato, pasti a righe e barra in basso.
    I colori cambiano con il tema scelto in Storico, Dati (apple, dark, sport). */
 
 :root { --nav-h: 66px; }
 
-body {
+body, .pv {
   /* tema Apple-like (predefinito) */
   --bg-grad: linear-gradient(180deg, #f7f7f3 0%, #edf0f5 100%);
   --bg-end: #edf0f5;
@@ -46,7 +46,7 @@ body {
   --toast: #1d2328;
   --on-toast: #fff;
 }
-body.theme-dark {
+body.theme-dark, .pv.theme-dark {
   --bg-grad: linear-gradient(180deg, #0d1216 0%, #171d20 100%);
   --bg-end: #171d20;
   --ink: #edf5f1;
@@ -83,7 +83,7 @@ body.theme-dark {
   --toast: #edf5f1;
   --on-toast: #10161a;
 }
-body.theme-sport {
+body.theme-sport, .pv.theme-sport {
   --bg-grad: linear-gradient(180deg, #fbeadf 0%, #f2ded5 100%);
   --bg-end: #f2ded5;
   --red: #d9544d;
@@ -305,6 +305,58 @@ body.theme-dark .btn.solid { background: var(--accent); }
 .sess li { display: flex; flex-wrap: wrap; gap: 2px 10px; padding: 4px 0; font-size: .92rem; font-weight: 600; }
 .sess li span { color: var(--muted); margin-left: auto; }
 .sess .note { font-size: .88rem; color: var(--muted); margin: 0 0 10px 12px; font-weight: 600; }
+
+/* ---- Storico a quattro sezioni ---- */
+.seg.four { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.seg.four button { font-size: .86rem; padding: 10px 2px; }
+
+/* ---- anteprima stili ---- */
+.style-row { display: grid; grid-template-columns: 136px minmax(0, 1fr); gap: 16px; align-items: center; }
+.style-row.cur { border-color: var(--accent-solid); box-shadow: inset 0 0 0 2px var(--accent-solid); }
+.style-info h2 { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.04em; }
+.style-info .btn { width: 100%; margin-top: 12px; padding: 0 10px; }
+.style-info .btn[disabled] { opacity: .7; cursor: default; }
+.pv { font-size: 9px; line-height: 1.25; aspect-ratio: 9 / 17; display: flex; flex-direction: column; gap: 5px; padding: 9px 8px 0; overflow: hidden; border-radius: 18px; background: var(--bg-grad); border: 1px solid var(--line); color: var(--ink); box-shadow: var(--shadow); }
+.pv-date { font-size: 12px; font-weight: 800; letter-spacing: -0.04em; }
+.pv-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 3px; border-radius: 8px; background: var(--seg-bg); }
+.pv-seg i { font-style: normal; text-align: center; padding: 4px 0; border-radius: 6px; font-weight: 800; font-size: 7.5px; color: var(--muted); }
+.pv-seg i.on { background: var(--accent); color: var(--on-accent); }
+.pv-card { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 7px; border-radius: 10px; background: var(--hero); border: 1px solid var(--line); }
+.pv-ico { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); }
+.pv-card b { display: block; font-size: 11px; font-weight: 800; letter-spacing: -0.04em; }
+.pv-card em { display: block; font-style: normal; font-size: 7.5px; font-weight: 600; color: var(--muted); }
+.pv-card u { display: block; position: relative; height: 3px; margin-top: 4px; border-radius: 2px; background: var(--dot); overflow: hidden; text-decoration: none; }
+.pv-card u::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--w); background: var(--green); }
+.pv-chips { display: flex; gap: 3px; }
+.pv-chips i { font-style: normal; padding: 3px 5px; border-radius: 999px; background: var(--chip); border: 1px solid var(--line); font-size: 7px; font-weight: 700; }
+.pv-chips i.on { background: var(--green); border-color: transparent; color: #fff; }
+.pv-nav { display: flex; justify-content: space-around; padding: 5px 0 6px; margin: 1px -8px 0; background: var(--nav-bg); border-top: 1px solid var(--nav-line); }
+.pv-nav i { width: 10px; height: 10px; border-radius: 50%; background: var(--dot); }
+.pv-nav i.on { background: var(--dot-on); }
+
+/* ---- record, tabelle, misure, riepilogo ---- */
+.rec-g { font-size: .95rem; font-weight: 800; color: var(--muted); margin: 14px 0 2px; }
+.rec { list-style: none; margin: 0; padding: 0; }
+.rec li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); }
+.rec .rn { font-weight: 700; }
+.rec b { font-weight: 800; white-space: nowrap; }
+.rec small { color: var(--muted); font-weight: 700; min-width: 42px; text-align: right; }
+.tag { display: inline-block; margin-left: 4px; padding: 2px 8px; border-radius: 999px; background: var(--green-soft); color: var(--green); font-size: .72rem; font-weight: 800; vertical-align: middle; }
+.mt { width: 100%; border-collapse: collapse; font-size: .92rem; font-weight: 600; margin: 6px 0 4px; }
+.mt th, .mt td { text-align: left; padding: 8px 4px; border-top: 1px solid var(--line); vertical-align: baseline; }
+.mt thead th { border-top: 0; color: var(--muted); font-size: .78rem; font-weight: 700; }
+.mt tbody th { font-weight: 800; }
+.mt th small { display: block; color: var(--muted); font-weight: 600; font-size: .75rem; }
+.mt td { font-variant-numeric: tabular-nums; }
+.mform { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.mfield { display: block; }
+.mfield.wide { grid-column: 1 / -1; }
+.mfield > span { display: block; font-size: .78rem; color: var(--muted); font-weight: 700; margin-bottom: 3px; }
+.dateinput { width: 100%; height: 44px; border: 1px solid var(--field-line); border-radius: 12px; background: var(--field); padding: 0 12px; font-weight: 700; }
+.mlist { list-style: none; margin: 4px 0 0; padding: 0; }
+.mlist li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 4px 0; border-top: 1px solid var(--line); font-size: .9rem; font-weight: 600; }
+.mlist span { color: var(--muted); }
+.summary { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: .9rem; font-weight: 600; line-height: 1.5; margin: 8px 0 0; padding: 12px; border-radius: 12px; background: var(--ex); border: 1px solid var(--line); }
 
 /* ---- grafici ---- */
 .vz { margin: 8px 0 4px; }

@@ -99,10 +99,10 @@ function line(o) {
 }
 
 /* Barre orizzontali, una sola serie.
-   o = { label, summary, items: [{ label, value, f, tip }] } */
+   o = { label, summary, max (facoltativo, per fissare il fondo scala), items: [{ label, value, f, tip }] } */
 function bars(o) {
   const items = o.items || [];
-  const max = Math.max(0, ...items.map(i => i.value)) || 1;
+  const max = o.max || Math.max(0, ...items.map(i => i.value)) || 1;
   const rows = items.map(it => {
     const w = it.value > 0 ? Math.max(it.value / max * 100, 1.5) : 0;
     const tip = it.tip || '';

@@ -3,7 +3,39 @@
 > **Nota: ad ogni aggiornamento della app, aggiornare questo file.**
 > Aggiungi in cima una nuova sezione con numero di versione, data e l'elenco di cosa è stato aggiunto, cambiato o corretto. Le versioni più recenti stanno in alto.
 
-Versione attuale: **1.5**
+Versione attuale: **1.6**
+
+---
+
+## Versione 1.6 (15/10/2026)
+
+Controllo delle 4 settimane, aderenza, record personali, esportazione in Excel, anteprima degli stili e suono di fine recupero. I dati della 1.5 si conservano.
+
+### Suono di fine recupero
+- Quando il timer arriva a zero la app suona tre note brevi (oltre alla vibrazione, che su iPhone non funziona).
+- In Storico, Dati: interruttore "Suono a fine recupero" e tasto "Prova il suono".
+- Il browser abilita l'audio solo dopo un tuo tocco: basta aver toccato la app una volta. Su iPhone il tasto silenzioso e il volume contano.
+
+### Storico
+- Quattro sezioni: Progressi, Controllo, Sedute (l'ex "Allenamenti") e Dati.
+
+### Controllo delle settimane
+- Il programma parte il 9/10/2026 e dura 4 settimane: il controllo è il 6/11/2026. In alto i giorni trascorsi e quanti ne mancano.
+- Peso con grafico, sedute fatte e pasti spuntati, tabella settimana per settimana, creatina.
+- Misure (petto, vita, fianchi, braccio, coscia) con data, tabella inizio, ora e variazione, e possibilità di eliminarle.
+- Riepilogo per il controllo, pronto da copiare.
+
+### Progressi
+- Record personali per gruppo muscolare: il miglior set di ogni esercizio (prima il peso, poi le ripetizioni), con l'etichetta "Nuovo" negli ultimi 7 giorni.
+- Aderenza: barre per settimana, Allenamenti oppure Pasti. Si conta dal primo giorno registrato; i pasti solo nei giorni già conclusi.
+
+### Dati
+- Esporta in Excel: file CSV (punto e virgola, decimali con la virgola) per serie e allenamenti, peso e misure, pasti e creatina.
+- Anteprima stili: Apple-like, Scuro e Sport, con "Usa questo stile".
+
+### Tecnico
+- Nuovo campo misure nei dati salvati, migrazione automatica. Cache del service worker palestra-v1.6.
+- Il backup JSON include misure e impostazione del suono.
 
 ---
 

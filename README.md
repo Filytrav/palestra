@@ -16,7 +16,7 @@ Web app personale: scheda di allenamento interattiva, dieta che cambia nei giorn
 - **Scheda**: modifica esercizi, varianti, serie, ripetizioni, carichi, note e gruppo muscolare.
 - **Dieta**: i due piani (allenamento e riposo) con orari, grammature e macro. Dove vedi la sottolineatura tratteggiata puoi cambiare alimento o condimento.
 - **Spesa**: nella riga dei giorni tocca per scegliere A (allenamento), R (riposo) o trattino (escluso). La lista somma le quantità di tutta la settimana secondo le scelte fatte in Dieta. Puoi spuntare, mettere "Ho già" e copiare la lista.
-- **Storico**: Progressi (peso corporeo, andamento di ogni esercizio, gruppi muscolari, volume), Allenamenti (elenco delle sedute) e Dati (recupero, stile, backup).
+- **Storico**: Progressi (peso, esercizi, record, gruppi muscolari, volume, aderenza), Controllo (4 settimane, misure, riepilogo), Sedute (elenco) e Dati (recupero, suono, stile, anteprima stili, esportazione CSV, backup).
 
 ## Dati e backup
 

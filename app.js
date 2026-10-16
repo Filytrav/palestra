@@ -4,7 +4,7 @@
 const D = window.APP_DATA;
 const VZ = window.VZ;
 const KEY = 'palestra.v1';      // stessa chiave delle versioni precedenti: i dati si conservano
-const VERSION = '1.7';
+const VERSION = '1.7.1';
 
 /* ---------- utilità ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -89,6 +89,7 @@ function migrate(s) {
   // scheda: gruppo muscolare e varianti
   s.workouts.forEach(w => (w.exercises || []).forEach(ex => {
     if (!ex.group) ex.group = D.exGroup[ex.id] || 'altro';
+    if (ex.id === 'addom' && ex.bw === undefined) ex.bw = 'bw';   // Addominali parte a peso corporeo; si cambia in Scheda
     const defs = D.variantDefs[ex.id];
     if (defs && !hasVars(ex)) {
       const split = defs[0].kg != null && ex.kg === defs[0].kg;
@@ -774,12 +775,12 @@ function avgAt(d, ws) {
 }
 function trendFor(points) {
   const ws = weightsSorted();
-  if (ws.length < 3) return [];
+  if (ws.length < 2) return [];
   return points.map(p => ({ d: p.d, y: Math.round(avgAt(p.d, ws) * 100) / 100 })).filter(p => Number.isFinite(p.y));
 }
 function trendText() {
   const ws = weightsSorted();
-  if (ws.length < 3) return '';
+  if (ws.length < 2) return '';
   const last = ws[ws.length - 1].d, now = avgAt(last, ws);
   const prevAt = addDays(last, -7), prev = ws.some(w => w.d <= prevAt) ? avgAt(prevAt, ws) : null;
   let t = `Tendenza, media degli ultimi 7 giorni: ${(Math.round(now * 10) / 10).toFixed(1).replace('.', ',')} kg`;
@@ -899,7 +900,8 @@ function weightChart(list) {
   const points = list.map(w => ({ d: w.d, y: w.kg }));
   const tr = trendFor(points), tt = trendText();
   return VZ.line({ label: 'Peso corporeo', unit: 'kg', points, trend: tr.length > 1 ? tr : null })
-    + (tr.length > 1 && tt ? `<p class="sub tight trend-note"><i class="trend-key"></i>${esc(tt)}</p>` : '');
+    + (tr.length > 1 && tt ? `<p class="sub tight trend-note"><i class="trend-key"></i>${esc(tt)}</p>`
+      : (S.weights.length < 2 ? `<p class="sub tight">La linea di tendenza compare dal secondo peso registrato.</p>` : ''));
 }
 const weightForm = cur => `<div class="inline"><label class="field"><input id="w-in" inputmode="decimal" placeholder="${fmtN(cur.kg)}" aria-label="Peso di oggi in chili"><span>kg</span></label><button class="btn solid" data-act="wsave">Salva il peso</button></div>`;
 

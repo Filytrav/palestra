@@ -3,7 +3,17 @@
 > **Nota: ad ogni aggiornamento della app, aggiornare questo file.**
 > Aggiungi in cima una nuova sezione con numero di versione, data e l'elenco di cosa è stato aggiunto, cambiato o corretto. Le versioni più recenti stanno in alto.
 
-Versione attuale: **1.7**
+Versione attuale: **1.7.1**
+
+---
+
+## Versione 1.7.1 (15/10/2026)
+
+Correzione della 1.7: il peso corporeo e la linea di tendenza erano poco visibili.
+
+- Addominali ora parte a "Peso corporeo": nella schermata Allenamento si vede il peso corporeo (l'ultimo registrato) e nelle serie non c'è più il campo kg. Si cambia in Scheda, voce "Carico" (Pesi, Peso corporeo, Peso corporeo + zavorra). Chi aveva già scelto un carico diverso lo conserva.
+- La linea di tendenza del peso (tratteggiata) compare dal secondo peso registrato, non più dal terzo. Se hai un solo peso, sotto il grafico c'è scritto quando compare. Se ti pesi una volta a settimana la linea tratteggiata coincide quasi con quella piena: la differenza si vede con più pesate nella stessa settimana.
+- Cache del service worker: palestra-v1.7.1.
 
 ---
 

@@ -3,7 +3,21 @@
 > **Nota: ad ogni aggiornamento della app, aggiornare questo file.**
 > Aggiungi in cima una nuova sezione con numero di versione, data e l'elenco di cosa è stato aggiunto, cambiato o corretto. Le versioni più recenti stanno in alto.
 
-Versione attuale: **1.7.1**
+Versione attuale: **1.8**
+
+---
+
+## Versione 1.8 (21/10/2026)
+
+Novità
+- **Modalità serie** a schermo intero: un solo esercizio alla volta, peso e ripetizioni con grandi pulsanti − e +, già precompilati dall'ultima volta, nota sull'esercizio e pulsante "Serie fatta". Si apre dal pulsante "Modalità serie" nell'allenamento.
+- **Recupero a schermo intero** con anello che si svuota, +15 s, "Salta il recupero" e anteprima della serie successiva. Il suono finale resta.
+- **Recupero diverso per ogni esercizio** (ad esempio 1 min 30 s): si imposta in Scheda; gli esercizi senza impostazione usano il recupero generale (ora da 30 s a 5 min).
+- **Riepilogo di fine allenamento**: durata, serie, volume, confronto con la volta scorsa, nuovi record, come è andata (leggero, giusto, pesante) e nota.
+- **Calendario del mese** nello Storico: la scheda "Sedute" diventa "Diario", con giorni di allenamento fatti o previsti, pallini per i pasti (seguiti, sgarro, saltato, incompleti) e dettaglio del giorno toccato.
+
+Cambiato
+- Il promemoria del backup è ora una finestra (come la domanda sul tipo di giorno) e non occupa più spazio nella home.
 
 ---
 

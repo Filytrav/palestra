@@ -1,7 +1,7 @@
 /* Service worker: rende l'app utilizzabile anche senza rete.
    Per i file dell'app prova prima la rete (così gli aggiornamenti arrivano subito)
    e usa la copia salvata solo se sei offline. */
-const CACHE = 'palestra-v1.7.1';
+const CACHE = 'palestra-v1.8';
 const SHELL = ['./', 'index.html', 'style.css', 'data.js', 'charts.js', 'app.js', 'manifest.webmanifest',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 

@@ -25,3 +25,7 @@ I dati sono salvati nel browser del telefono (non online). Se cambi telefono o c
 ## Aggiornare la dieta
 
 Dopo il controllo delle 4 settimane modifica `data.js` (grammature, alimenti, calorie, data di inizio) e ricarica il file su GitHub. L'app si aggiorna da sola al prossimo avvio con la rete.
+
+
+## 1.8
+Modalità serie a schermo intero, recupero con anello, recupero per esercizio (Scheda), riepilogo di fine allenamento e calendario nel Diario (Storico).

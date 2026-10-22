@@ -3,7 +3,15 @@
 > **Nota: ad ogni aggiornamento della app, aggiornare questo file.**
 > Aggiungi in cima una nuova sezione con numero di versione, data e l'elenco di cosa è stato aggiunto, cambiato o corretto. Le versioni più recenti stanno in alto.
 
-Versione attuale: **1.9**
+Versione attuale: **1.9.1**
+
+---
+
+## Versione 1.9.1 (22/10/2026)
+
+Correzione: su iPhone, in Safari e nell'app sulla Home, le nuove versioni potevano non comparire per ore.
+- L'app ora chiede sempre al sito se i file sono cambiati, invece di usare la copia tenuta dal telefono.
+- Nuovo pulsante **Controlla aggiornamenti** in Storico, Dati: cancella la copia salvata e ricarica l'app. I tuoi dati non si toccano.
 
 ---
 

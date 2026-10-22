@@ -4,7 +4,7 @@
 const D = window.APP_DATA;
 const VZ = window.VZ;
 const KEY = 'palestra.v1';      // stessa chiave delle versioni precedenti: i dati si conservano
-const VERSION = '1.9';
+const VERSION = '1.9.1';
 
 /* ---------- utilità ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -1472,6 +1472,7 @@ function renderDati() {
       <p class="sub tight">I dati restano su questo telefono. Salva ogni tanto un backup.${S.settings.lastBackup ? ` Ultimo backup: ${esc(longDate(S.settings.lastBackup))}.` : ' Non hai ancora salvato un backup.'}</p>
       <div class="btns"><button class="btn" data-act="export">Esporta il backup</button>
         <label class="btn">Importa un backup<input type="file" accept="application/json,.json" data-chg="import" hidden></label>
+        <button class="btn" data-act="forceupd">Controlla aggiornamenti</button>
         <button class="btn" data-act="tutor">Rivedi il tutorial</button>
         <button class="btn danger" data-act="reset">Ripristina i dati di base</button></div>
     </section>
@@ -2217,6 +2218,12 @@ Object.assign(A, {
     try { S = migrate(JSON.parse(S.demo.snap)); } catch (e) { S = blankState(); }
     delete S.demo; S.settings.welcomed = true; save(); ui.tab = 'oggi'; ui.view = 'home'; ui.focus = null; render(false); toast('Prova terminata');
   },
+  forceupd() {
+    toast('Aggiorno…');
+    const go = () => { location.replace(location.pathname + '?v=' + Date.now()); };
+    const regs = navigator.serviceWorker ? navigator.serviceWorker.getRegistrations().then(rs => Promise.all(rs.map(r => r.unregister()))) : Promise.resolve();
+    Promise.all([regs, window.caches ? caches.keys().then(ks => Promise.all(ks.map(k => caches.delete(k)))) : null]).then(go, go);
+  },
   tutor() { ui.tour = true; ui.wel = welNew(); ui.wel.step = 3; ui.wel.tour = true; render(false); },
 
   undo() {
@@ -2283,6 +2290,6 @@ render(false);
 askDay();
 askBackup();
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').then(watchUpdates).catch(() => {}));
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(watchUpdates).catch(() => {}));
 }
 })();

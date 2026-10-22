@@ -29,3 +29,7 @@ Dopo il controllo delle 4 settimane modifica `data.js` (grammature, alimenti, ca
 
 ## 1.8
 Modalità serie a schermo intero, recupero con anello, recupero per esercizio (Scheda), riepilogo di fine allenamento e calendario nel Diario (Storico).
+
+
+## 1.9
+Benvenuto al primo avvio con tutorial e prova guidata, annulla, modifica dei giorni passati, calorie e proteine (stima), backup con foglio di condivisione, avviso di nuova versione.

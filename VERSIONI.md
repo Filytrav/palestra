@@ -3,7 +3,25 @@
 > **Nota: ad ogni aggiornamento della app, aggiornare questo file.**
 > Aggiungi in cima una nuova sezione con numero di versione, data e l'elenco di cosa è stato aggiunto, cambiato o corretto. Le versioni più recenti stanno in alto.
 
-Versione attuale: **1.8**
+Versione attuale: **1.9**
+
+---
+
+## Versione 1.9 (22/10/2026)
+
+Novità
+- **Schermata di benvenuto** al primo avvio (solo se l'app non ha ancora dati): "Sono nuovo" (tutorial in 4 passi: peso e altezza, giorni di allenamento, scheda vuota o di esempio, modalità serie, dieta e Diario), "Ho già usato l'app" (importa il backup) oppure "Salta" (parti da zero, senza dati né esempi). Dal tutorial si può fare una **prova guidata** con dati di esempio che non finiscono nello storico. Il tutorial si rivede da Storico, Dati.
+- **Annulla**: dopo aver eliminato un esercizio, una variante o una serie, o dopo un import o un ripristino, compare "Annulla" per 6 secondi. Eliminare un esercizio non chiede più conferma.
+- **Modifica dei giorni passati**: nel Diario, toccando un giorno, "Modifica la seduta" permette di correggere peso, zavorra e ripetizioni, aggiungere o togliere serie, o eliminare la seduta. I pasti di un giorno passato si correggono toccandoli (non fatto, fatto, saltato, sgarro).
+- **Calorie e proteine**: nella Dieta e nel dettaglio del giorno, quante ne hai mangiate rispetto al totale previsto. È una stima: il totale del giorno viene diviso tra i pasti usando valori medi degli alimenti.
+- **Backup più comodo**: su iPhone "Esporta il backup" apre il foglio di condivisione, da cui puoi salvare in File o iCloud Drive.
+- **Avviso di nuova versione**: quando i file su GitHub cambiano, in alto compare "Nuova versione disponibile, Aggiorna".
+- **Spazio usato** in Dati, con avviso se i dati diventano molti.
+
+Cambiato
+- Scheda vuota: Oggi spiega come aggiungere gli esercizi; il peso corporeo può non esserci.
+- Contrasto più forte se l'iPhone ha "Aumenta contrasto" e contorno ben visibile sui pulsanti con la tastiera.
+- Controllati i tempi con 500 giorni di storico (circa 900 KB di dati): le schermate si aprono in pochi millisecondi, e l'app funziona anche senza rete.
 
 ---
 

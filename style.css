@@ -1,4 +1,4 @@
-/* Palestra 1.8
+/* Palestra 1.9
    Il layout riprende l'anteprima della home (tema Apple-like): data, selettore Allenamento/Riposo,
    scheda riepilogo con punteggio, esercizi con bordo colorato, pasti a righe e barra in basso.
    I colori cambiano con il tema scelto in Storico, Dati (apple, dark, sport). */
@@ -551,3 +551,41 @@ body[data-view="focus"] #app { padding-bottom: calc(20px + env(safe-area-inset-b
 .calday .cd-slip { color: var(--amber); }
 .calday .cd-skip { color: var(--red); }
 :root { --blue-solid: #2c6bc7; }
+
+/* ===== 1.9 ===== */
+body[data-view="welcome"] .tabbar, body[data-view="welcome"] #timer { display: none; }
+body[data-view="welcome"] #app { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+.welcome { display: flex; flex-direction: column; gap: 14px; min-height: calc(100vh - 60px); padding-top: 12px; }
+.welcome h1 { font-size: 2.2rem; letter-spacing: -0.04em; margin: 28px 0 0; }
+.welcome h2 { font-size: 1.6rem; letter-spacing: -0.03em; margin: 4px 0 0; }
+.wopts { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.wopt { min-height: 72px; border-radius: 20px; border: 1px solid var(--line); background: var(--hero); color: var(--ink); text-align: left; padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; font: inherit; }
+.wopt b { font-size: 1.15rem; } .wopt span { font-size: .92rem; color: var(--muted); font-weight: 600; }
+.wopt.main { background: var(--blue-solid, #2c6bc7); color: #fff; border: 0; } .wopt.main span { color: #dce8fb; }
+.wnote { text-align: center; } .wgrow { flex: 1; }
+.wdots { display: flex; gap: 6px; } .wdots i { flex: 1; height: 5px; border-radius: 3px; background: var(--line); } .wdots i.on { background: var(--blue-solid, #2c6bc7); }
+.wform { gap: 12px; } .wlab { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; font-weight: 700; color: var(--muted); }
+.wlab input, .wlab select { font: inherit; font-size: 1.1rem; font-weight: 700; min-height: 50px; border-radius: 14px; border: 1px solid var(--line); padding: 0 12px; background: transparent; color: var(--ink); }
+.wdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.wdays button { min-height: 46px; border-radius: 12px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-weight: 800; font: inherit; }
+.wdays button.on { background: var(--blue-solid, #2c6bc7); color: #fff; border-color: transparent; }
+.wdemo { align-items: center; text-align: center; } .wbig { font-size: 2.6rem; font-weight: 800; line-height: 1.1; } .wbig small { font-size: 1rem; }
+.wfile { text-align: center; display: flex; align-items: center; justify-content: center; }
+.demo { background: #f6f1e7; color: #5a4a1d; border-radius: 16px; padding: 10px 14px; font-size: .9rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+.demo button { border: 0; background: #5a4a1d; color: #fff; border-radius: 10px; min-height: 40px; padding: 0 12px; font-weight: 800; font: inherit; font-size: .9rem; }
+#toast.act { pointer-events: auto; display: flex; align-items: center; gap: 12px; }
+#toast .tact { border: 0; background: transparent; color: #8ec1ff; font: inherit; font-weight: 800; min-height: 36px; padding: 0 4px; }
+#upd { position: fixed; left: 12px; right: 12px; top: calc(10px + env(safe-area-inset-top)); z-index: 9; background: #17814e; color: #fff; border-radius: 16px; padding: 8px 8px 8px 14px; display: flex; align-items: center; gap: 8px; font-weight: 700; box-shadow: var(--shadow); }
+#upd span { flex: 1; } #upd button { border: 0; border-radius: 10px; min-height: 40px; padding: 0 12px; font: inherit; font-weight: 800; background: #fff; color: #17814e; } #upd .x { background: transparent; color: #fff; font-size: 1.3rem; }
+.edrow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; padding: 10px 0; border-top: 1px solid var(--line); }
+.edrow .edn { grid-column: 1 / -1; font-weight: 800; }
+.edrow label { display: flex; flex-direction: column; gap: 2px; font-size: .8rem; font-weight: 700; color: var(--muted); }
+.edrow input { font: inherit; font-size: 1.05rem; font-weight: 700; min-height: 46px; border-radius: 12px; border: 1px solid var(--line); padding: 0 10px; background: transparent; color: var(--ink); width: 100%; }
+.edrow .mini-toggle, .edrow .lnk { min-height: 44px; }
+.calmeals { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.cm { min-height: 54px; border-radius: 14px; border: 1px solid var(--line); background: transparent; color: var(--ink); text-align: left; padding: 6px 12px; font: inherit; display: flex; flex-direction: column; }
+.cm span { font-weight: 800; font-size: .92rem; } .cm small { color: var(--muted); font-weight: 700; }
+.cm.done { background: var(--green-soft); } .cm.skip { background: var(--red-soft); } .cm.slip { background: var(--amber-soft); }
+.sub.warn { color: var(--amber); font-weight: 800; }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+@media (prefers-contrast: more) { body, .pv { --muted: #3b454d; --line: rgba(23, 29, 33, 0.35); } body.theme-dark { --muted: #d5dde3; --line: rgba(255, 255, 255, 0.4); } }

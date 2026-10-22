@@ -1,4 +1,4 @@
-/* Palestra 1.9
+/* Palestra 2.0
    Il layout riprende l'anteprima della home (tema Apple-like): data, selettore Allenamento/Riposo,
    scheda riepilogo con punteggio, esercizi con bordo colorato, pasti a righe e barra in basso.
    I colori cambiano con il tema scelto in Storico, Dati (apple, dark, sport). */
@@ -589,3 +589,94 @@ body[data-view="welcome"] #app { padding-bottom: calc(24px + env(safe-area-inset
 .sub.warn { color: var(--amber); font-weight: 800; }
 :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 @media (prefers-contrast: more) { body, .pv { --muted: #3b454d; --line: rgba(23, 29, 33, 0.35); } body.theme-dark { --muted: #d5dde3; --line: rgba(255, 255, 255, 0.4); } }
+
+/* ===== 2.0 ===== */
+/* avvio: logo finché l'app non è pronta */
+#boot { position: fixed; inset: 0; z-index: 20; background: #edf0f5; color: #1d2328; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; transition: opacity .3s; }
+#boot img { border-radius: 22px; } #boot b { font-size: 1.4rem; letter-spacing: -.03em; }
+#boot.gone { opacity: 0; pointer-events: none; }
+@media (prefers-color-scheme: dark) { #boot { background: #171d20; color: #eef2f5; } }
+
+/* tipografia */
+body { font-variant-numeric: tabular-nums; }
+.top h1, h1.date { font-size: clamp(2rem, 6.4vw, 2.6rem); letter-spacing: -0.05em; }
+.card { margin-bottom: 16px; }
+
+/* home: settimana */
+.weekcard { background: var(--hero); border: 1px solid var(--line); border-radius: 20px; padding: 10px 12px 8px; margin: 10px 0; }
+.wkrow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.wk { border: 0; background: transparent; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; padding: 4px 0; font: inherit; border-radius: 12px; }
+.wk .wl { font-size: .72rem; font-weight: 800; color: var(--muted); }
+.wk .wkd { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--line); }
+.wk .wkd svg { width: 16px; height: 16px; fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.wk.done .wkd { background: var(--blue); border-color: var(--blue); }
+.wk.plan .wkd { border: 2px dashed var(--blue); }
+.wk.miss .wkd { border-color: var(--red); opacity: .55; }
+.wk.rest .wkd { background: var(--line); border-color: transparent; opacity: .6; }
+.wk.today .wl { color: var(--ink); } .wk.today { background: rgba(44, 107, 199, .12); }
+.wkstats { display: flex; justify-content: space-between; gap: 6px; font-size: .84rem; color: var(--muted); font-weight: 700; padding: 4px 4px 2px; }
+.wkstats b { color: var(--ink); font-size: 1rem; }
+@media (max-height: 880px) { .weekcard { padding: 6px 12px 4px; margin: 6px 0; } .wk { min-height: 46px; padding: 2px 0; } .wkstats { padding-top: 2px; } }
+@media (max-height: 799px) { .weekcard { display: none; } }
+
+/* stato vuoto */
+.emptycard { background: var(--hero); border: 1px solid var(--line); border-radius: 22px; padding: 18px 16px; margin: 10px 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+.emptycard h2 { font-size: 1.4rem; letter-spacing: -.03em; } .emptycard p { color: var(--muted); font-weight: 600; font-size: .95rem; }
+.eart { width: 120px; height: 96px; } .eart .e1 { fill: var(--line); stroke: var(--muted); stroke-width: 2; } .eart .e2 { fill: var(--blue); } .eart .e3, .eart .e4 { fill: none; stroke: var(--muted); stroke-width: 3; stroke-linecap: round; } .eart .e4 { stroke: var(--blue); }
+
+/* grafici */
+.vz-band { fill: var(--blue); opacity: .1; } .vz-bandlab { fill: var(--muted); font-size: 10px; font-weight: 800; }
+.vz-recring { fill: none; stroke: var(--gold); stroke-width: 2.5; } .vz-reclab { fill: var(--gold); font-size: 11px; font-weight: 800; }
+
+/* animazioni (si fermano con "Riduci movimento") */
+@keyframes pop { 0% { transform: scale(.85); opacity: 0; } 60% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes rise { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+.focus .fjust { animation: pop .35s ease-out; }
+.focus .fcard { animation: rise .25s ease-out; }
+.rg-fg { transition: stroke .4s; } .rg-fg.low { stroke: var(--amber, #b8730a); animation: pulse 1s infinite; } .rg-fg.end { stroke: #1f9d60; }
+.fdone:active { transform: scale(.97); } .fdone { transition: transform .1s; }
+@media (prefers-reduced-motion: reduce) { .focus .fjust, .focus .fcard, .rg-fg.low { animation: none; } }
+
+/* avviso */
+#toast { bottom: calc(var(--nav-h) + 14px + env(safe-area-inset-bottom)); max-width: min(86vw, 340px); padding: 8px 14px; font-size: .9rem; transform: translate(-50%, 8px); transition: opacity .2s, transform .2s; }
+#toast.show { transform: translate(-50%, 0); }
+body[data-view="focus"] #toast, body[data-view="welcome"] #toast { bottom: calc(14px + env(safe-area-inset-bottom)); }
+
+/* Scheda a card */
+.erow { border: 1px solid var(--line); border-radius: 16px; padding: 0 12px 12px; margin: 10px 0; display: block; }
+.erow > summary { list-style: none; display: flex; align-items: center; gap: 8px; min-height: 62px; cursor: pointer; padding: 8px 0; }
+.erow > summary::-webkit-details-marker { display: none; }
+.erow > summary::after { content: ''; width: 9px; height: 9px; border-right: 2.5px solid var(--muted); border-bottom: 2.5px solid var(--muted); transform: rotate(45deg); margin: 0 6px 4px 4px; transition: transform .2s; flex: none; }
+.erow[open] > summary::after { transform: rotate(-135deg); margin-bottom: -2px; }
+.esum { flex: 1; min-width: 0; display: flex; flex-direction: column; } .esum b { font-size: 1.05rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .esum small { color: var(--muted); font-weight: 700; }
+.emv { display: flex; gap: 4px; }
+.mv { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: transparent; display: grid; place-items: center; color: var(--ink); }
+.mv:disabled { opacity: .3; } .mv svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.erow > *:not(summary) { margin-top: 8px; }
+
+/* Dieta */
+.items li { display: flex; align-items: center; gap: 10px; } .items li .food { flex: 1; min-width: 0; }
+.fi { font-size: 1.35rem; width: 30px; text-align: center; flex: none; }
+.meal-card.done .items { opacity: .55; }
+
+/* tema scuro: colori dei pallini e dei giorni */
+body.theme-dark .dt.ok { background: #4fd18b; } body.theme-dark .dt.slip { background: #f0a43c; } body.theme-dark .dt.skip { background: #ff7b72; } body.theme-dark .dt.part { background: #b7c2cb; }
+body.theme-dark .wk.plan .wkd { border-color: #6aa6ff; } body.theme-dark .wk.today { background: rgba(106, 166, 255, .16); }
+body.theme-sport .wk.done .wkd { background: var(--accent, #e8590c); border-color: var(--accent, #e8590c); }
+
+/* icone: stesso tratto ovunque */
+.ico svg, .big-ico svg, .mv svg, .calnav svg, .back svg { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+/* modalità serie in orizzontale: più compatta, peso e ripetizioni affiancati */
+@media (orientation: landscape) and (max-height: 520px) {
+  .tabbar { display: none; }
+  .focus { gap: 8px; }
+  .focus .fcard { display: grid; grid-template-columns: 1fr 1fr; column-gap: 14px; row-gap: 6px; padding: 10px 14px; }
+  .focus .fcard .frow, .focus .fcard > h2, .focus .fcard > .flab, .focus .fcard > .sub { grid-column: 1 / -1; }
+  .focus .fstep button { min-height: 52px; }
+  .focus .fdone { min-height: 52px; }
+  .focus .ring { width: 150px; height: 150px; margin: 0 auto; }
+  .focus .rg-in b { font-size: 2.2rem; }
+  .focus .ringwrap { padding: 0; }
+}

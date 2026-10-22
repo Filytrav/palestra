@@ -4,7 +4,7 @@
 const D = window.APP_DATA;
 const VZ = window.VZ;
 const KEY = 'palestra.v1';      // stessa chiave delle versioni precedenti: i dati si conservano
-const VERSION = '1.9.1';
+const VERSION = '2.0';
 
 /* ---------- utilità ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -124,7 +124,7 @@ function save() {
 }
 
 const ui = {
-  wel: null, tour: false, editK: null,
+  wel: null, tour: false, editK: null, exOpen: {},
   tab: 'oggi', view: 'home', dietView: 'train', stView: 'progressi', focus: null, calM: null, calSel: null, fLast: '',
   pg: { period: '30', key: null, metric: 'kg', mg: 'sets', ad: 'train' }
 };
@@ -295,6 +295,8 @@ const itemTopping = it => {
   return it.toppings.includes(S.toppings[it.id]) ? S.toppings[it.id] : it.toppings[0];
 };
 
+const FOOD_ICON = { albume: '🥚', banane: '🍌', verdure: '🥬', piselli: '🫛', avena: '🌾', basmati: '🍚', integrale: '🍚', riso: '🍚', olio: '🫒', passata: '🍅', tonno: '🐟', panino: '🥖', pollo: '🍗', tacchino: '🦃', fesa: '🦃', cosce: '🍗', manzo: '🥩', hamburger: '🍔', lonza: '🥩', coniglio: '🐇', calamari: '🦑', polpo: '🐙' };
+const foodIcon = id => FOOD_ICON[id] || (D.food[id] && D.food[id].cat === 'pesce' ? '🐟' : D.food[id] && D.food[id].cat === 'carne' ? '🥩' : '🍽️');
 function itemHtml(it) {
   const fid = itemFood(it);
   const main = it.choices
@@ -307,7 +309,7 @@ function itemHtml(it) {
     top = `<select class="sub2" data-chg="topping" data-item="${it.id}" aria-label="Condimento">${it.toppings.map(c =>
       `<option value="${c}"${c === t ? ' selected' : ''}>${esc(D.toppings[c].label)}</option>`).join('')}</select>`;
   }
-  return `<li><div class="food">${main}${top}</div><b class="g">${it.g} g</b></li>`;
+  return `<li><span class="fi" aria-hidden="true">${foodIcon(fid)}</span><div class="food">${main}${top}</div><b class="g">${it.g} g</b></li>`;
 }
 
 function macrosHtml(t) {
@@ -371,6 +373,35 @@ function segDay(type) {
   return `<div class="seg" role="group" aria-label="Tipo di giorno">${b('train', 'Allenamento')}${b('rest', 'Riposo')}</div>`;
 }
 
+function streakDays() {
+  let k = todayKey();
+  if (!hasActivity(S.days[k])) k = addDays(k, -1);
+  let n = 0;
+  while (hasActivity(S.days[k]) && n < 3650) { n++; k = addDays(k, -1); }
+  return n;
+}
+function weekStrip() {
+  const t = todayKey(), mon = addDays(t, -wdIndex(fromKey(t)));
+  const L = ['L', 'M', 'M', 'G', 'V', 'S', 'D'];
+  let planned = 0, done = 0;
+  const cells = L.map((l, i) => {
+    const k = addDays(mon, i), train = dayType(k) === 'train', dn = hasDone(S.days[k]);
+    if (train) planned++;
+    if (dn) done++;
+    const st = dn ? 'done' : train ? (k >= t ? 'plan' : 'miss') : 'rest';
+    const name = { done: 'allenamento fatto', plan: 'allenamento previsto', miss: 'allenamento non fatto', rest: 'riposo' }[st];
+    const aria = `${fromKey(k).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}: ${name}`;
+    return `<button class="wk ${st}${k === t ? ' today' : ''}" data-act="wkday" data-k="${k}" aria-label="${esc(aria)}"><span class="wl">${l}</span><i class="wkd">${st === 'done' ? svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>') : ''}</i></button>`;
+  }).join('');
+  const ws = weightsSorted(), cur = ws[ws.length - 1], sn = streakDays();
+  const bits = [
+    cur ? `<span><b>${fmtN(cur.kg)}</b> kg</span>` : '',
+    `<span><b>${sn}</b> ${sn === 1 ? 'giorno' : 'giorni'} di fila</span>`,
+    planned ? `<span><b>${done}</b>/${planned} sedute</span>` : ''
+  ].filter(Boolean).join('');
+  return `<section class="weekcard" aria-label="Questa settimana"><div class="wkrow">${cells}</div><div class="wkstats">${bits}</div></section>`;
+}
+const EMPTY_ART = '<svg class="eart" viewBox="0 0 120 96" aria-hidden="true"><rect x="30" y="8" width="60" height="80" rx="10" class="e1"/><rect x="46" y="3" width="28" height="12" rx="6" class="e2"/><path d="M42 36h36M42 48h24M42 60h30" class="e3"/><g class="e4"><path d="M8 78v-14M14 74v-6M112 78v-14M106 74v-6M14 71h-6M106 71h6"/></g></svg>';
 function renderHome() {
   const k = todayKey(), d = dayRec(k), type = dayType(k), train = type === 'train';
   const w = workoutFor(k), pr = workoutProgress(k, w);
@@ -393,6 +424,8 @@ function renderHome() {
         <p>${mdone} di ${meals.length} pasti${nextMeal ? `. Prossimo: ${esc(shortMeal(nextMeal))}, ${nextMeal.time}` : '. Tutto fatto per oggi'}</p>
         <div class="meter"><i style="--w:${mp}%"></i></div></div>
     </button>`;
+  const emptyCard = (!w.exercises.length && !trainedDays().length && !S.demo)
+    ? `<section class="emptycard">${EMPTY_ART}<h2>Crea la tua scheda</h2><p>Aggiungi gli esercizi che fai: poi qui compaiono la settimana, i progressi e la modalità serie.</p><button class="btn solid wide" data-act="tab" data-tab="scheda">Crea la scheda</button></section>` : '';
   const quick = `<section class="quick"><h3>Segna al volo</h3><div class="quick-row">
       <button class="mini-toggle${d.quick.creatina ? ' on' : ''}" data-act="creatina" aria-pressed="${!!d.quick.creatina}">Creatina</button>
       ${meals.map(m => `<button class="mini-toggle${d.meals[m.id] ? ' on' : ''}${d.flags[m.id] ? ' ' + d.flags[m.id] : ''}" data-act="meal" data-id="${m.id}" aria-pressed="${!!d.meals[m.id]}">${esc(shortMeal(m))}</button>`).join('')}
@@ -401,6 +434,8 @@ function renderHome() {
     ${demoBanner()}
     <h1 class="date">${esc(fmtLong(new Date()))}</h1>
     ${segDay(type)}
+    ${emptyCard}
+    ${emptyCard ? '' : weekStrip()}
     <div class="home-grid">${work}${diet}</div>
     ${quick}
   </div>`;
@@ -509,6 +544,11 @@ function renderOggi() {
 }
 
 /* ---------- schermata: Scheda (modifica) ---------- */
+function exSummary(ex) {
+  const v = hasVars(ex) ? ex.variants[0] : ex, m = bwMode(ex);
+  const load = m === 'bw' ? 'peso corporeo' : m === 'add' ? `corpo + ${fmtN(v.kg || 0)} kg` : (v.kg != null ? `${fmtN(v.kg)} kg` : 'corpo libero');
+  return `${v.sets ?? '—'}×${v.reps ?? '—'} · ${load}${hasVars(ex) ? ` · ${ex.variants.length} varianti` : ''}`;
+}
 function renderScheda() {
   const groupOpts = cur => D.groups.map(g => `<option value="${g[0]}"${g[0] === cur ? ' selected' : ''}>${g[1]}</option>`).join('');
   const nums = (kind, o, mode) => `<div class="nums">
@@ -524,7 +564,9 @@ function renderScheda() {
   const loadOpts = cur => [['off', 'Pesi'], ['bw', 'Peso corporeo'], ['add', 'Peso corporeo + zavorra']].map(([v, l]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${l}</option>`).join('');
   return `<header class="top"><h1>Scheda</h1><p class="sub">Cambia esercizi, serie, ripetizioni e carichi. Gli esercizi con più varianti hanno pesi separati per ciascuna. Gli allenamenti già registrati restano com'erano.</p></header>`
     + S.workouts.map((w, wi) => `<section class="card"><h2>${esc(w.name)}</h2>
-      ${w.exercises.map((ex, ei) => `<div class="erow" data-w="${wi}" data-e="${ei}">
+      ${w.exercises.map((ex, ei) => `<details class="erow" data-w="${wi}" data-e="${ei}" data-id="${esc(ex.id)}"${ui.exOpen[ex.id] ? ' open' : ''}>
+        <summary><span class="esum"><b>${esc(ex.name)}</b><small>${esc(exSummary(ex))}</small></span>
+          <span class="emv"><button class="mv" data-act="exmove" data-d="-1" aria-label="Sposta su ${esc(ex.name)}"${ei === 0 ? ' disabled' : ''}>${svg('<path d="M6 14l6-6 6 6"/>')}</button><button class="mv" data-act="exmove" data-d="1" aria-label="Sposta giù ${esc(ex.name)}"${ei === w.exercises.length - 1 ? ' disabled' : ''}>${svg('<path d="M6 10l6 6 6-6"/>')}</button></span></summary>
         <input data-chg="ex" data-f="name" value="${esc(ex.name)}" aria-label="Nome dell'esercizio">
         <label class="sel"><span>Gruppo muscolare</span><select data-chg="ex" data-f="group">${groupOpts(ex.group)}</select></label>
         ${hasVars(ex)
@@ -539,7 +581,7 @@ function renderScheda() {
         <input data-chg="ex" data-f="note" value="${esc(ex.note || '')}" placeholder="Nota (facoltativa)" aria-label="Nota">
         <button class="lnk" data-act="addvar">Aggiungi una variante</button>
         <button class="lnk danger" data-act="delex" aria-label="Elimina ${esc(ex.name)}">Elimina esercizio</button>
-      </div>`).join('')}
+      </details>`).join('')}
       <button class="btn" data-act="addex" data-w="${wi}">Aggiungi esercizio</button>
     </section>`).join('');
 }
@@ -913,7 +955,7 @@ const tileHtml = (label, val, unit) => `<div class="tile"><span>${label}</span><
 function weightChart(list) {
   const points = list.map(w => ({ d: w.d, y: w.kg }));
   const tr = trendFor(points), tt = trendText();
-  return VZ.line({ label: 'Peso corporeo', unit: 'kg', points, trend: tr.length > 1 ? tr : null })
+  return VZ.line({ label: 'Peso corporeo', unit: 'kg', points, trend: tr.length > 1 ? tr : null, band: { from: progStart(), to: progEnd(), label: 'Programma' } })
     + (tr.length > 1 && tt ? `<p class="sub tight trend-note"><i class="trend-key"></i>${esc(tt)}</p>`
       : (S.weights.length < 2 ? `<p class="sub tight">La linea di tendenza compare dal secondo peso registrato.</p>` : ''));
 }
@@ -1148,7 +1190,7 @@ function renderRest(k, w, pr, nx) {
       <h2>Serie ${nx.i + 1} di ${rowCount(k, nx.key, nx.p)}, ${esc(nx.name)}</h2>
       <p class="sub tight">${esc(loadTxt)} × ${df.reps ?? '—'} rip</p>
     </section>
-    ${prev ? `<section class="finfo"><p>Serie appena fatta: ${esc(prev)}</p></section>` : ''}
+    ${prev ? `<section class="finfo fjust"><p>Serie appena fatta: ${esc(prev)}</p></section>` : ''}
     <div class="fgrow"></div>
     <div class="flinks"><button class="lnk" data-act="fclose">Vai alla lista</button><button class="lnk" data-act="finish">Termina l'allenamento</button></div>
   </div>`;
@@ -1161,6 +1203,8 @@ function drawFocusRest(msLeft, left) {
   const shown = Math.max(left, 0), total = timer.total;
   num.textContent = `${Math.floor(shown / 60)}:${pad(shown % 60)}`;
   const ring = $('#f-ring');
+  if (ring) ring.classList.toggle('low', left > 0 && left <= 10);
+  if (ring) ring.classList.toggle('end', left <= 0);
   if (ring) ring.style.strokeDashoffset = String((RING * (1 - Math.max(0, Math.min(1, msLeft / (total * 1000))))).toFixed(1));
   const lab = $('#f-lab'), sk = $('#f-skip');
   if (lab) lab.textContent = left <= 0 ? 'Pronto per la prossima serie' : `su ${recText(total)}`;
@@ -1369,7 +1413,7 @@ function renderProgressi() {
       <select class="pick" data-chg="pgkey" aria-label="Esercizio">${opts}</select>
       <div class="metrics" role="group" aria-label="Cosa mostrare">${mchips}</div>
       ${pts.length
-        ? `${tiles}${VZ.line({ label: M.label, unit: M.unit, integer: M.integer, fmtV: fv, points: pts })}
+        ? `${tiles}${VZ.line({ label: M.label, unit: M.unit, integer: M.integer, fmtV: fv, points: pts, mark: 'max' })}
            ${pts.length < 2 ? '<p class="sub tight">Dopo il prossimo allenamento compare l\'andamento.</p>' : ''}`
         : `<p class="empty">Nessuna serie completata per questo esercizio ${periodText()}.</p>`}
     </section>`;
@@ -1485,6 +1529,8 @@ let renderedDay = todayKey();
 
 function render(keep) {
   const y = window.scrollY || 0;
+  const boot = $('#boot');
+  if (boot) { boot.classList.add('gone'); setTimeout(() => boot.remove(), 400); }
   renderedDay = todayKey();
   document.body.classList.remove('theme-apple', 'theme-dark', 'theme-sport');
   document.body.classList.add(`theme-${S.settings.theme}`);
@@ -1924,6 +1970,7 @@ const I = {
   note(el) { dayRec(todayKey()).note = el.value; save(); }
 };
 
+document.addEventListener('toggle', e => { const d = e.target; if (d && d.classList && d.classList.contains('erow')) { if (d.open) ui.exOpen[d.dataset.id] = true; else delete ui.exOpen[d.dataset.id]; } }, true);
 document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && A[el.dataset.act]) A[el.dataset.act](el, e); });
 document.addEventListener('change', e => { const el = e.target.closest('[data-chg]'); if (el && C[el.dataset.chg]) C[el.dataset.chg](el, e); });
 document.addEventListener('input', e => { const el = e.target.closest('[data-inp]'); if (el && I[el.dataset.inp]) I[el.dataset.inp](el, e); });
@@ -2223,6 +2270,18 @@ Object.assign(A, {
     const go = () => { location.replace(location.pathname + '?v=' + Date.now()); };
     const regs = navigator.serviceWorker ? navigator.serviceWorker.getRegistrations().then(rs => Promise.all(rs.map(r => r.unregister()))) : Promise.resolve();
     Promise.all([regs, window.caches ? caches.keys().then(ks => Promise.all(ks.map(k => caches.delete(k)))) : null]).then(go, go);
+  },
+  wkday(el) {
+    const k = el.dataset.k;
+    ui.tab = 'storico'; ui.stView = 'allenamenti'; ui.calM = k.slice(0, 7); ui.calSel = k; ui.focus = null;
+    render(false);
+  },
+  exmove(el, e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    const row = el.closest('.erow'), arr = S.workouts[+row.dataset.w].exercises, i = +row.dataset.e, j = i + (+el.dataset.d);
+    if (j < 0 || j >= arr.length) return;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+    save(); render(true);
   },
   tutor() { ui.tour = true; ui.wel = welNew(); ui.wel.step = 3; ui.wel.tour = true; render(false); },
 

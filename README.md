@@ -33,3 +33,7 @@ Modalità serie a schermo intero, recupero con anello, recupero per esercizio (S
 
 ## 1.9
 Benvenuto al primo avvio con tutorial e prova guidata, annulla, modifica dei giorni passati, calorie e proteine (stima), backup con foglio di condivisione, avviso di nuova versione.
+
+
+## 2.0
+Home con settimana, scheda a card con riordino, icone nella dieta, grafici con record e fascia programma, animazioni del recupero, tema scuro più curato, modalità orizzontale.

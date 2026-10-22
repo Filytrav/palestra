@@ -3,7 +3,24 @@
 > **Nota: ad ogni aggiornamento della app, aggiornare questo file.**
 > Aggiungi in cima una nuova sezione con numero di versione, data e l'elenco di cosa è stato aggiunto, cambiato o corretto. Le versioni più recenti stanno in alto.
 
-Versione attuale: **1.9.1**
+Versione attuale: **2.0**
+
+---
+
+## Versione 2.0 (22/10/2026)
+
+Grafica e dettagli
+- **Home più viva**: la settimana in una riga (fatto, previsto, non fatto, riposo; toccando un giorno si apre nel Diario) e sotto il peso di oggi, i giorni di fila con attività e le sedute della settimana. Sugli schermi bassi la riga della settimana si nasconde per non far scorrere la home.
+- **Stato vuoto**: se la scheda non ha esercizi, la home propone "Crea la scheda" con un'illustrazione.
+- **Grafici**: fascia colorata "Programma" nel grafico del peso e anello dorato "Record" sul valore più alto di un esercizio.
+- **Recupero**: l'anello diventa ambra negli ultimi 10 secondi e verde a fine recupero; la serie appena fatta compare con una piccola animazione (si ferma con "Riduci movimento").
+- **Scheda**: gli esercizi sono card compatte che si aprono con un tocco, con le frecce per spostarli su e giù.
+- **Dieta**: un'icona per ogni alimento e i pasti già fatti più sbiaditi.
+- **Avviso "Annulla"** più piccolo e sopra la barra in basso.
+- **Tipografia**: titoli più grandi e numeri a larghezza fissa, così non ballano mentre cambiano.
+- **Tema scuro**: pallini del calendario più luminosi; tema Sport con il suo colore sui giorni fatti.
+- **Orizzontale**: la modalità serie e il recupero sono più compatti con il telefono girato.
+- **Avvio**: logo mentre l'app si carica e colore della barra del browser che segue chiaro e scuro.
 
 ---
 

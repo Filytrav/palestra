@@ -52,6 +52,18 @@ function line(o) {
   const Y = v => T + ph - (v - nt.min) * ph / (nt.max - nt.min);
   const P = pts.map((p, i) => ({ x: +X(xs[i]).toFixed(1), y: +Y(p.y).toFixed(1), f: fmtV(p.y), d: lab(p.d), t: p.tip || '' }));
   const base = T + ph;
+  // fascia colorata (es. il periodo del programma) e segno del valore massimo
+  let band = '';
+  if (o.band && o.band.from && o.band.to) {
+    const bx0 = Math.max(L, Math.min(W - R, X(dayNum(o.band.from)))), bx1 = Math.max(L, Math.min(W - R, X(dayNum(o.band.to))));
+    if (bx1 - bx0 > 4) band = `<rect class="vz-band" x="${bx0.toFixed(1)}" y="${T}" width="${(bx1 - bx0).toFixed(1)}" height="${ph}" rx="6"/>${o.band.label ? `<text class="vz-bandlab" x="${(bx0 + 6).toFixed(1)}" y="${T + 12}">${esc(o.band.label)}</text>` : ''}`;
+  }
+  let mark = '';
+  if (o.mark === 'max' && P.length > 2) {
+    let mi = 0; pts.forEach((p, i) => { if (p.y >= pts[mi].y) mi = i; });
+    const mp = P[mi];
+    mark = `<circle class="vz-recring" cx="${mp.x}" cy="${mp.y}" r="9"/>` + (mi === P.length - 1 ? '' : `<text class="vz-reclab" x="${mp.x}" y="${(mp.y < T + 14 ? mp.y + 22 : mp.y - 14).toFixed(1)}" text-anchor="${mp.x > W - 50 ? 'end' : mp.x < L + 30 ? 'start' : 'middle'}">Record</text>`);
+  }
 
   const grid = nt.ticks.map((t, i) => {
     const y = Y(t).toFixed(1);
@@ -89,7 +101,7 @@ function line(o) {
   return `<figure class="vz" data-vz="line">
     <div class="vz-read" aria-live="polite"><i class="vz-key"></i><b data-r="f">${esc(lp.f)}</b><span data-r="d">${esc(lp.d)}</span><span data-r="t">${esc(lp.t)}</span></div>
     <svg class="vz-svg" viewBox="0 0 ${W} ${H}" role="img" tabindex="0" aria-label="${esc(label)}: ${esc(P[0].d)} ${esc(P[0].f)}, ${esc(lp.d)} ${esc(lp.f)}" data-i="${P.length - 1}" data-pts="${esc(JSON.stringify(P))}">
-      ${grid}${xlab}${area}${trendPath}${line2}
+      ${band}${grid}${xlab}${area}${trendPath}${line2}${mark}
       <line class="vz-cross" x1="0" x2="0" y1="${T}" y2="${base}" style="display:none"/>
       ${dots}
       <circle class="vz-hl" r="6" cx="0" cy="0" style="display:none"/>

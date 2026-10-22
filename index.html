@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Palestra</title>
-<meta name="theme-color" content="#f3f4f1">
+<meta name="theme-color" content="#f3f4f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171d20" media="(prefers-color-scheme: dark)">
 <meta name="description" content="Scheda di allenamento, dieta e lista della spesa">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -17,6 +18,7 @@
 </head>
 <body>
 <main id="app"></main>
+<div id="boot" aria-hidden="true"><img src="icons/icon-192.png" alt="" width="96" height="96"><b>Palestra</b></div>
 
 <div id="timer" hidden>
   <span class="t-num">0:00</span>

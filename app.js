@@ -4,7 +4,7 @@
 const D = window.APP_DATA;
 const VZ = window.VZ;
 const KEY = 'palestra.v1';      // stessa chiave delle versioni precedenti: i dati si conservano
-const VERSION = '2.0';
+const VERSION = '2.1';
 
 /* ---------- utilità ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -147,16 +147,24 @@ function dayType(k) {
 }
 
 function suggestedWid(k) {
-  const past = Object.keys(S.days).filter(d => d < k && S.days[d].wid && hasDone(S.days[d])).sort();
+  const past = Object.keys(S.days).filter(d => d < k && S.days[d].wid && !S.days[d].fw && hasDone(S.days[d])).sort();
   if (!past.length) return S.workouts[0].id;
   const i = S.workouts.findIndex(w => w.id === S.days[past[past.length - 1]].wid);
   return S.workouts[(i + 1) % S.workouts.length].id;
 }
 
+const isFree = w => !!(w && typeof w.id === 'string' && w.id.startsWith('free-'));
 function workoutFor(k) {
-  const id = S.days[k]?.wid;
-  return S.workouts.find(w => w.id === id) || S.workouts.find(w => w.id === suggestedWid(k)) || S.workouts[0];
+  const d = S.days[k];
+  let w = d && d.fw && d.wid === d.fw.id ? d.fw : null;
+  if (!w) w = S.workouts.find(x => x.id === (d && d.wid)) || S.workouts.find(x => x.id === suggestedWid(k)) || S.workouts[0];
+  if (d && d.order && d.order.length) {
+    const rank = id => { const i = d.order.indexOf(id); return i < 0 ? 1e6 : i; };
+    w = Object.assign({}, w, { exercises: w.exercises.map((e, i) => [e, i]).sort((a, b) => rank(a[0].id) - rank(b[0].id) || a[1] - b[1]).map(x => x[0]) });
+  }
+  return w;
 }
+const wOf = rec => (rec && rec.fw) || S.workouts.find(x => x.id === (rec && rec.wid));
 const findEx = id => workoutFor(todayKey()).exercises.find(e => e.id === id);
 
 /* variante scelta per oggi: quella segnata, altrimenti l'ultima usata, altrimenti la prima */
@@ -415,7 +423,7 @@ function renderHome() {
   const work = `<button class="big-btn" data-act="open" data-v="workout"${train ? '' : ' disabled'} aria-label="Allenamento">
       <div class="big-top"><span class="big-ico">${svg(ICON.dumbbell)}</span>${svg(ICON.go, 'big-go')}</div>
       <div><h2>Allenamento</h2>
-        <p>${train ? (pr.total ? `${esc(w.name)}, ${pr.done} di ${pr.total} serie` : `${esc(w.name)}: la scheda è vuota`) : `Oggi è riposo${nx ? `. Prossimo allenamento: ${nx}` : ''}`}</p>
+        <p>${train ? (pr.total ? `${esc(w.name)}, ${pr.done} di ${pr.total} serie` : isFree(w) ? 'Allenamento libero: aggiungi gli esercizi' : `${esc(w.name)}: la scheda è vuota`) : `Oggi è riposo${nx ? `. Prossimo allenamento: ${nx}` : ''}`}</p>
         <div class="meter"><i style="--w:${train ? wp : 0}%"></i></div></div>
     </button>`;
   const diet = `<button class="big-btn" data-act="open" data-v="meals" aria-label="Dieta">
@@ -424,7 +432,7 @@ function renderHome() {
         <p>${mdone} di ${meals.length} pasti${nextMeal ? `. Prossimo: ${esc(shortMeal(nextMeal))}, ${nextMeal.time}` : '. Tutto fatto per oggi'}</p>
         <div class="meter"><i style="--w:${mp}%"></i></div></div>
     </button>`;
-  const emptyCard = (!w.exercises.length && !trainedDays().length && !S.demo)
+  const emptyCard = (!w.exercises.length && !isFree(w) && !trainedDays().length && !S.demo)
     ? `<section class="emptycard">${EMPTY_ART}<h2>Crea la tua scheda</h2><p>Aggiungi gli esercizi che fai: poi qui compaiono la settimana, i progressi e la modalità serie.</p><button class="btn solid wide" data-act="tab" data-tab="scheda">Crea la scheda</button></section>` : '';
   const quick = `<section class="quick"><h3>Segna al volo</h3><div class="quick-row">
       <button class="mini-toggle${d.quick.creatina ? ' on' : ''}" data-act="creatina" aria-pressed="${!!d.quick.creatina}">Creatina</button>
@@ -499,8 +507,10 @@ function exHtml(k, ex) {
 function renderWorkoutView() {
   const k = todayKey();
   const w = workoutFor(k), pr = workoutProgress(k, w), nx = nextSet(k, w);
+  const dd = S.days[k], free = isFree(w);
   const chips = S.workouts.map(x =>
-    `<button class="chip${x.id === w.id ? ' on' : ''}" data-act="wid" data-id="${esc(x.id)}" aria-pressed="${x.id === w.id}">${esc(x.name)}</button>`).join('');
+    `<button class="chip${x.id === w.id ? ' on' : ''}" data-act="wid" data-id="${esc(x.id)}" aria-pressed="${x.id === w.id}">${esc(x.name)}</button>`).join('')
+    + (dd && dd.fw ? `<button class="chip${free ? ' on' : ''}" data-act="freestart" aria-pressed="${free}">Libero</button>` : `<button class="chip dashed" data-act="freestart">+ Libero</button>`);
   return `${demoBanner()}${subhead()}
     <section class="hero">
       <div class="hero-top">
@@ -510,8 +520,11 @@ function renderWorkoutView() {
       <div class="chip-row" role="group" aria-label="Giorno di scheda">${chips}</div>
       <p class="meta" data-meta>${esc(metaText(pr, nx))}</p>
       ${pr.total ? `<div class="btns"><button class="btn solid wide" data-act="focus">${pr.done ? 'Continua in modalità serie' : 'Modalità serie'}</button></div>` : ''}
+      ${w.exercises.length > 1 ? '<div class="btns"><button class="btn wide" data-act="ordopen">Cambia ordine degli esercizi</button></div>' : ''}
     </section>
-    ${w.exercises.length ? '' : '<section class="card"><h2>La scheda è vuota</h2><p class="sub tight">Aggiungi i tuoi esercizi dalla scheda.</p><div class="btns"><button class="btn solid" data-act="tab" data-tab="scheda">Vai alla Scheda</button></div></section>'}
+    ${free ? `<section class="card freecard"><h2>Allenamento libero</h2><p class="sub tight">${w.exercises.length ? 'Aggiungi altri esercizi quando vuoi. Se ti piace come è venuto, puoi salvarlo come scheda.' : 'Scegli gli esercizi che fai oggi. Quelli che già conosci ritrovano i carichi dell\'ultima volta.'}</p>
+      <div class="btns"><button class="btn solid" data-act="freeopen">Aggiungi esercizio</button>${w.exercises.length ? '<button class="btn" data-act="freesave">Salva come scheda</button>' : ''}</div></section>` : ''}
+    ${w.exercises.length || free ? '' : '<section class="card"><h2>La scheda è vuota</h2><p class="sub tight">Aggiungi i tuoi esercizi dalla scheda.</p><div class="btns"><button class="btn solid" data-act="tab" data-tab="scheda">Vai alla Scheda</button></div></section>'}
     ${w.exercises.map(ex => exHtml(k, ex)).join('')}
     <label class="notes"><span>Note dell'allenamento</span><textarea data-inp="note" rows="2">${esc(S.days[k]?.note || '')}</textarea></label>
     ${pr.done ? '<div class="btns"><button class="btn wide" data-act="finish">Termina l\'allenamento</button></div>' : ''}`;
@@ -886,7 +899,7 @@ function csvSets() {
   S.workouts.forEach(w => w.exercises.forEach(e => { exById[e.id] = e; }));
   const rows = [];
   Object.keys(S.days).sort().forEach(k => {
-    const rec = S.days[k], w = S.workouts.find(x => x.id === rec.wid);
+    const rec = S.days[k], w = wOf(rec);
     Object.keys(rec.sets || {}).forEach(key => {
       const [exId, vId] = key.split('~');
       const ex = exById[exId];
@@ -1166,7 +1179,7 @@ function renderSetFocus(k, w, pr, nx) {
     </section>
     <div class="fgrow"></div>
     <button class="fdone" data-act="fdone">${svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>', 'fck')}Serie fatta</button>
-    <div class="flinks"><button class="lnk" data-act="fclose">Vai alla lista</button><button class="lnk" data-act="finish">Termina l'allenamento</button></div>
+    <div class="flinks"><button class="lnk" data-act="fclose">Vai alla lista</button>${w.exercises.length > 1 ? '<button class="lnk" data-act="ordopen">Ordine</button>' : ''}<button class="lnk" data-act="finish">Termina l'allenamento</button></div>
   </div>`;
 }
 
@@ -1192,7 +1205,7 @@ function renderRest(k, w, pr, nx) {
     </section>
     ${prev ? `<section class="finfo fjust"><p>Serie appena fatta: ${esc(prev)}</p></section>` : ''}
     <div class="fgrow"></div>
-    <div class="flinks"><button class="lnk" data-act="fclose">Vai alla lista</button><button class="lnk" data-act="finish">Termina l'allenamento</button></div>
+    <div class="flinks"><button class="lnk" data-act="fclose">Vai alla lista</button>${w.exercises.length > 1 ? '<button class="lnk" data-act="ordopen">Ordine</button>' : ''}<button class="lnk" data-act="finish">Termina l'allenamento</button></div>
   </div>`;
 }
 
@@ -1306,7 +1319,7 @@ function renderCalendario() {
   if (sel) {
     const rec = S.days[sel], lines = [];
     if (hasDone(rec)) {
-      const w = S.workouts.find(x => x.id === rec.wid), sv = sessionVolume(rec);
+      const w = wOf(rec), sv = sessionVolume(rec);
       lines.push(`<p class="cd-main">${esc(w ? w.name : 'Allenamento')}, ${sv.sets} serie, ${fmtInt(sv.vol)} kg</p>`);
     } else lines.push(`<p class="cd-main">${dayType(sel) === 'train' ? 'Giorno di allenamento' : 'Giorno di riposo'}${sel >= t && dayType(sel) === 'train' ? ', previsto' : ''}</p>`);
     if (rec) {
@@ -1460,7 +1473,7 @@ function renderProgressi() {
     const rec = S.days[k];
     let vol = 0, sets = 0;
     Object.keys(rec.sets).forEach(key => { const st = stats(doneSets(rec, key)); vol += st.vol; sets += st.sets; });
-    const w = S.workouts.find(x => x.id === rec.wid);
+    const w = wOf(rec);
     return { d: k, vol, sets, tip: `${w ? w.name : 'Allenamento'}, ${sets} serie` };
   });
   const useVol = volPts.some(p => p.vol > 0);
@@ -1481,7 +1494,7 @@ function renderRegistro() {
   if (!days.length) return '<p class="empty">Quando completi delle serie compaiono qui.</p>';
   return `<section class="card" style="padding-top:4px">${days.map(k => {
     const rec = S.days[k];
-    const w = S.workouts.find(x => x.id === rec.wid);
+    const w = wOf(rec);
     let sets = 0, vol = 0;
     const lines = Object.keys(rec.sets).map(key => {
       const ds = doneSets(rec, key);
@@ -1989,7 +2002,7 @@ function openAsk(kind, html) {
   askPrev = document.activeElement;
   askKind = kind;
   askEl = document.createElement('div');
-  askEl.id = kind === 'day' ? 'dayask' : 'bkask';
+  askEl.id = kind === 'day' ? 'dayask' : kind === 'backup' ? 'bkask' : kind + 'ask';
   askEl.className = 'sheet-wrap';
   askEl.innerHTML = html;
   document.body.appendChild(askEl);
@@ -2018,7 +2031,7 @@ function askBackup() {
     <div class="sheet-btns"><button class="btn solid" data-act="backupnow">Salva il backup</button><button class="btn" data-act="backuplater">Più tardi</button></div>
   </div>`);
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && askEl) (askKind === 'backup' ? A.backuplater() : A.dayclose()); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && askEl) (askKind === 'backup' ? A.backuplater() : askKind === 'day' ? A.dayclose() : closeAsk()); });
 
 /* ================= 1.9 ================= */
 
@@ -2343,6 +2356,137 @@ Object.assign(I, {
   }
 });
 Object.assign(C, { welplan(el) { ui.wel.plan = el.value; } });
+
+
+/* ================= 2.1: ordine degli esercizi e allenamento libero ================= */
+function orderSheetHtml() {
+  const k = todayKey(), w = workoutFor(k), free = isFree(w);
+  const rows = w.exercises.map((ex, i) => {
+    const v = selVariant(k, ex), p = plan(ex, v), key = skey(ex, v);
+    const n = rowCount(k, key, p), dn = getSets(k, key).filter(x => x && x.done).length;
+    return `<li class="ordrow${dn >= n ? ' fin' : ''}" data-id="${esc(ex.id)}">
+      <span class="ordn"><b>${esc(ex.name)}</b><small>${dn} di ${n} serie${dn >= n ? ', fatto' : ''}</small></span>
+      <button class="mv" data-act="ordmove" data-d="-1" aria-label="Sposta su ${esc(ex.name)}"${i === 0 ? ' disabled' : ''}>${svg('<path d="M6 14l6-6 6 6"/>')}</button>
+      <button class="mv" data-act="ordmove" data-d="1" aria-label="Sposta giù ${esc(ex.name)}"${i === w.exercises.length - 1 ? ' disabled' : ''}>${svg('<path d="M6 10l6 6 6-6"/>')}</button>
+      <button class="mv txt" data-act="ordlast" aria-label="Rimanda ${esc(ex.name)} in fondo"${i === w.exercises.length - 1 ? ' disabled' : ''}>In fondo</button>
+      ${free && dn === 0 ? `<button class="mv txt danger" data-act="freerm" aria-label="Togli ${esc(ex.name)}">Togli</button>` : ''}
+    </li>`;
+  }).join('');
+  return `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ord-t">
+    <h2 id="ord-t">Ordine degli esercizi</h2>
+    <p class="sub">Vale per l'allenamento di oggi. Il prossimo da fare è il primo con serie ancora da completare.</p>
+    <ol class="ordlist">${rows}</ol>
+    <div class="sheet-btns"><button class="btn solid" data-act="ordclose">Fatto</button></div>
+    ${free ? '' : '<button class="lnk" data-act="ordsave">Salva questo ordine nella Scheda</button>'}
+  </div>`;
+}
+function refreshOrder() { if (askEl && askKind === 'order') { askEl.innerHTML = orderSheetHtml(); } render(true); }
+function setOrder(ids) { const d = dayRec(todayKey()); d.order = ids; save(); }
+
+function knownExercises(skip) {
+  const seen = new Map();
+  const add = ex => { const n = String(ex.name || '').trim().toLowerCase(); if (n && !seen.has(n) && !skip.has(ex.id)) seen.set(n, ex); };
+  S.workouts.forEach(w => w.exercises.forEach(add));
+  Object.values(S.days).forEach(r => { if (r.fw) r.fw.exercises.forEach(add); });
+  return [...seen.values()];
+}
+function freeResultsHtml(q) {
+  const d = S.days[todayKey()], have = new Set((d && d.fw ? d.fw.exercises : []).map(e => e.id));
+  const ql = (q || '').trim().toLowerCase();
+  const list = knownExercises(have).filter(e => !ql || e.name.toLowerCase().includes(ql)).slice(0, 30);
+  if (!list.length) return `<p class="sub tight">${ql ? 'Nessun esercizio con questo nome: puoi crearlo qui sotto.' : 'Hai già aggiunto tutti gli esercizi che conosco.'}</p>`;
+  return list.map(e => `<button class="fr" data-act="freepick" data-id="${esc(e.id)}"><b>${esc(e.name)}</b><small>${esc(groupName(e.group || 'altro'))}</small></button>`).join('');
+}
+function freeSheetHtml() {
+  const groupOpts = D.groups.map(g => `<option value="${g[0]}"${g[0] === 'altro' ? ' selected' : ''}>${g[1]}</option>`).join('');
+  return `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="free-t">
+    <h2 id="free-t">Aggiungi un esercizio</h2>
+    <input id="free-q" data-inp="freeq" placeholder="Cerca o scrivi il nome" autocomplete="off" autocapitalize="sentences" aria-label="Nome dell'esercizio">
+    <div class="fres" id="free-res">${freeResultsHtml('')}</div>
+    <label class="wlab">Gruppo muscolare, per gli esercizi nuovi<select id="free-g">${groupOpts}</select></label>
+    <div class="sheet-btns"><button class="btn solid" data-act="freenew">Crea esercizio nuovo</button><button class="btn" data-act="freeclose">Fatto</button></div>
+  </div>`;
+}
+function freeAdd(ex) {
+  const k = todayKey(), d = dayRec(k);
+  if (!d.fw) return;
+  if (d.fw.exercises.some(e => e.id === ex.id)) return;
+  d.fw.exercises.push(ex);
+  save();
+}
+
+Object.assign(A, {
+  /* ordine */
+  ordopen() { openAsk('order', orderSheetHtml()); },
+  ordclose() { closeAsk(); },
+  ordmove(el) {
+    const id = el.closest('.ordrow').dataset.id, ids = workoutFor(todayKey()).exercises.map(e => e.id), i = ids.indexOf(id), j = i + (+el.dataset.d);
+    if (i < 0 || j < 0 || j >= ids.length) return;
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+    setOrder(ids); refreshOrder();
+  },
+  ordlast(el) {
+    const id = el.closest('.ordrow').dataset.id, ids = workoutFor(todayKey()).exercises.map(e => e.id).filter(x => x !== id);
+    ids.push(id); setOrder(ids); refreshOrder();
+  },
+  ordsave() {
+    const k = todayKey(), d = dayRec(k), ids = workoutFor(k).exercises.map(e => e.id);
+    const w = S.workouts.find(x => x.id === d.wid) || S.workouts.find(x => x.id === workoutFor(k).id);
+    if (!w) return;
+    snapUndo();
+    w.exercises = ids.map(id => w.exercises.find(e => e.id === id)).filter(Boolean).concat(w.exercises.filter(e => !ids.includes(e.id)));
+    save(); closeAsk(); toast('Ordine salvato nella Scheda', 'Annulla');
+  },
+  /* allenamento libero */
+  freestart() {
+    const k = todayKey(), d = dayRec(k);
+    if (!d.fw) d.fw = { id: 'free-' + k, name: 'Allenamento libero', exercises: [] };
+    d.wid = d.fw.id; d.type = 'train';
+    ui.view = 'workout'; ui.focus = null; save(); render(true);
+    if (!d.fw.exercises.length) A.freeopen();
+  },
+  freeopen() { openAsk('free', freeSheetHtml()); const q = $('#free-q'); if (q) q.focus(); },
+  freeclose() { closeAsk(); },
+  freepick(el) {
+    const id = el.dataset.id, d = dayRec(todayKey());
+    const src = knownExercises(new Set()).find(e => e.id === id);
+    if (!src || !d.fw) return;
+    const copy = JSON.parse(JSON.stringify(src));
+    freeAdd(copy);
+    const r = $('#free-res'); if (r) r.innerHTML = freeResultsHtml(($('#free-q') || {}).value);
+    render(true); toast('Aggiunto: ' + copy.name);
+  },
+  freenew() {
+    const q = $('#free-q'), name = q ? q.value.trim() : '';
+    if (!name) { toast('Scrivi il nome dell\'esercizio'); if (q) q.focus(); return; }
+    const g = $('#free-g');
+    freeAdd({ id: uid(), name, group: g ? g.value : 'altro', sets: 3, reps: 10, kg: null });
+    if (q) q.value = '';
+    const r = $('#free-res'); if (r) r.innerHTML = freeResultsHtml('');
+    render(true); toast('Aggiunto: ' + name);
+  },
+  freerm(el) {
+    const id = el.closest('.ordrow').dataset.id, d = dayRec(todayKey());
+    if (!d.fw) return;
+    snapUndo();
+    d.fw.exercises = d.fw.exercises.filter(e => e.id !== id);
+    if (d.order) d.order = d.order.filter(x => x !== id);
+    save(); refreshOrder(); toast('Esercizio tolto', 'Annulla');
+  },
+  freesave() {
+    const k = todayKey(), w = workoutFor(k);
+    if (!isFree(w) || !w.exercises.length) return;
+    const def = 'Allenamento del ' + fromKey(k).toLocaleDateString('it-IT', { day: 'numeric', month: 'long' });
+    const name = (typeof prompt === 'function' ? prompt('Come vuoi chiamare questa scheda?', def) : def);
+    if (name === null || !String(name).trim()) return;
+    snapUndo();
+    S.workouts.push({ id: 'w' + uid(), name: String(name).trim(), exercises: JSON.parse(JSON.stringify(w.exercises)) });
+    save(); toast('Scheda salvata, la trovi in Scheda', 'Annulla');
+  }
+});
+Object.assign(I, {
+  freeq(el) { const r = $('#free-res'); if (r) r.innerHTML = freeResultsHtml(el.value); }
+});
 
 /* ---------- avvio ---------- */
 render(false);

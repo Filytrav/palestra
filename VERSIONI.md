@@ -3,7 +3,27 @@
 > **Nota: ad ogni aggiornamento della app, aggiornare questo file.**
 > Aggiungi in cima una nuova sezione con numero di versione, data e l'elenco di cosa è stato aggiunto, cambiato o corretto. Le versioni più recenti stanno in alto.
 
-Versione attuale: **2.0**
+Versione attuale: **2.1**
+
+---
+
+## Punti aperti
+
+Idee valutate e non ancora fatte. Quando decidiamo, si tolgono da qui.
+
+- **Import di corse, camminate e altri sport (Strava, Apple Fitness)** — da decidere (13/11/2026).
+  - Un collegamento automatico non è possibile: Strava richiede un accesso con un segreto che su un sito statico (GitHub Pages) non si può nascondere, e l'app Salute di Apple non è raggiungibile dal browser.
+  - Strada fattibile, a mano: importare `activities.csv` dall'archivio dati di Strava e i file GPX o TCX; importare `export.xml` da Apple Salute (letto a pezzi, può essere lento se il file è molto grande); in alternativa un Comando Rapido di iPhone che esporta solo gli allenamenti.
+  - Le attività si vedrebbero nel Diario, nel calendario e nei giorni di fila (tipo, durata, distanza, calorie), senza doppioni, con anche l'inserimento a mano. Serve un nuovo tipo di dato: lavoro medio-grande.
+  - Da decidere: se usi Strava, Apple Watch o tutti e due, e quali sport registrare.
+
+---
+
+## Versione 2.1 (13/11/2026)
+
+Novità
+- **Cambia ordine degli esercizi anche nella modalità serie**: il link "Ordine" (nella serie e nel recupero) e il pulsante "Cambia ordine degli esercizi" nella lista aprono un elenco con le frecce su e giù e "In fondo" (utile quando la macchina è occupata). L'ordine vale per l'allenamento di oggi; "Salva questo ordine nella Scheda" lo rende fisso. Il prossimo esercizio è sempre il primo con serie ancora da fare.
+- **Allenamento libero**: nella schermata Allenamento, il pulsante "+ Libero" accanto ai giorni di scheda avvia una seduta vuota. Scegli gli esercizi cercandoli tra quelli già usati (ritrovi i carichi dell'ultima volta, i record e i grafici) oppure crei un esercizio nuovo con il suo gruppo muscolare. Si usa come un allenamento normale: modalità serie, riepilogo, Diario. "Salva come scheda" lo trasforma in una nuova scheda. Nel Diario compare come "Allenamento libero".
 
 ---
 

@@ -1,4 +1,4 @@
-/* Palestra 2.0
+/* Palestra 2.1
    Il layout riprende l'anteprima della home (tema Apple-like): data, selettore Allenamento/Riposo,
    scheda riepilogo con punteggio, esercizi con bordo colorato, pasti a righe e barra in basso.
    I colori cambiano con il tema scelto in Storico, Dati (apple, dark, sport). */
@@ -680,3 +680,21 @@ body.theme-sport .wk.done .wkd { background: var(--accent, #e8590c); border-colo
   .focus .rg-in b { font-size: 2.2rem; }
   .focus .ringwrap { padding: 0; }
 }
+
+/* ===== 2.1 ===== */
+.chip.dashed { border-style: dashed; color: var(--muted); }
+.freecard .btns { display: flex; gap: 8px; flex-wrap: wrap; } .freecard .btn { flex: 1; }
+.ordlist { list-style: none; margin: 8px 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 46vh; overflow: auto; }
+.ordrow { display: flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 14px; padding: 6px 8px; }
+.ordrow.fin { opacity: .6; }
+.ordn { flex: 1; min-width: 0; display: flex; flex-direction: column; } .ordn b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ordn small { color: var(--muted); font-weight: 700; }
+.mv.txt { width: auto; padding: 0 10px; font: inherit; font-size: .82rem; font-weight: 800; }
+.mv.danger { color: var(--red); }
+#freeask input#free-q { width: 100%; font: inherit; font-size: 1.1rem; font-weight: 700; min-height: 50px; border-radius: 14px; border: 1px solid var(--line); padding: 0 12px; background: transparent; color: var(--ink); margin: 8px 0; }
+.fres { display: flex; flex-direction: column; gap: 6px; max-height: 32vh; overflow: auto; margin-bottom: 8px; }
+.fr { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 48px; border-radius: 12px; border: 1px solid var(--line); background: transparent; color: var(--ink); padding: 6px 12px; font: inherit; text-align: left; }
+.fr small { color: var(--muted); font-weight: 700; }
+.flinks { flex-wrap: wrap; row-gap: 0; }
+
+#toast { z-index: 70; }
+body:has(.sheet-wrap) #toast { bottom: auto; top: calc(14px + env(safe-area-inset-top)); }

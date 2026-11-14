@@ -37,3 +37,7 @@ Benvenuto al primo avvio con tutorial e prova guidata, annulla, modifica dei gio
 
 ## 2.0
 Home con settimana, scheda a card con riordino, icone nella dieta, grafici con record e fascia programma, animazioni del recupero, tema scuro più curato, modalità orizzontale.
+
+
+## 2.1
+Cambio ordine degli esercizi (anche in modalità serie) e allenamento libero. Punti aperti: vedi VERSIONI.md.

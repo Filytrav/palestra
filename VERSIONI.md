@@ -3,7 +3,14 @@
 > **Nota: ad ogni aggiornamento della app, aggiornare questo file.**
 > Aggiungi in cima una nuova sezione con numero di versione, data e l'elenco di cosa è stato aggiunto, cambiato o corretto. Le versioni più recenti stanno in alto.
 
-Versione attuale: **2.1**
+Versione attuale: **2.1.1**
+
+---
+
+## Versione 2.1.1 (15/11/2026)
+
+Correzione
+- **Settimana nella Home**: sugli schermi bassi (Safari con la barra dell'indirizzo, iPhone piccoli) la riga della settimana spariva del tutto, per cui sembrava non funzionare. Ora si vede sempre; sugli schermi bassi diventa più compatta e nasconde solo la riga con peso, giorni di fila e sedute. La Home continua a entrare senza scorrere. Toccando un giorno si apre il Diario su quel giorno.
 
 ---
 

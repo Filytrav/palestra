@@ -617,7 +617,7 @@ body { font-variant-numeric: tabular-nums; }
 .wkstats { display: flex; justify-content: space-between; gap: 6px; font-size: .84rem; color: var(--muted); font-weight: 700; padding: 4px 4px 2px; }
 .wkstats b { color: var(--ink); font-size: 1rem; }
 @media (max-height: 880px) { .weekcard { padding: 6px 12px 4px; margin: 6px 0; } .wk { min-height: 46px; padding: 2px 0; } .wkstats { padding-top: 2px; } }
-@media (max-height: 799px) { .weekcard { display: none; } }
+@media (max-height: 799px) { .wkstats { display: none; } .weekcard { padding: 4px 10px 2px; margin: 4px 0; } .wk { min-height: 40px; } .wk .wkd { width: 24px; height: 24px; } }
 
 /* stato vuoto */
 .emptycard { background: var(--hero); border: 1px solid var(--line); border-radius: 22px; padding: 18px 16px; margin: 10px 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }

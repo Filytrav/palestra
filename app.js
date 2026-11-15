@@ -4,7 +4,7 @@
 const D = window.APP_DATA;
 const VZ = window.VZ;
 const KEY = 'palestra.v1';      // stessa chiave delle versioni precedenti: i dati si conservano
-const VERSION = '2.1';
+const VERSION = '2.1.1';
 
 /* ---------- utilità ---------- */
 const $ = (s, r = document) => r.querySelector(s);

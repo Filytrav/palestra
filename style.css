@@ -1,4 +1,4 @@
-/* Palestra 2.2
+/* Palestra 2.3
    Il layout riprende l'anteprima della home (tema Apple-like): data, selettore Allenamento/Riposo,
    scheda riepilogo con punteggio, esercizi con bordo colorato, pasti a righe e barra in basso.
    I colori cambiano con il tema scelto in Storico, Dati (apple, dark, sport). */
@@ -701,51 +701,50 @@ body:has(.sheet-wrap) #toast { bottom: auto; top: calc(14px + env(safe-area-inse
 
 /* ================= 2.2: colori, densità, forme, stili settimana, nuove funzioni ================= */
 body.theme-oceano, .pv.theme-oceano {
-  --bg-grad: linear-gradient(180deg, #e6f5f8 0%, #d3e8ee 100%);
-  --bg-end: #d3e8ee;
-  --accent: linear-gradient(135deg, #0e7490, #22a6c4);
-  --accent2: linear-gradient(135deg, #0e7490, #22a6c4);
-  --accent-solid: #0e86a8;
-  --blue: #0e7490;
-  --score: #0e86a8;
-  --ex-border: #1b94b5;
-  --surface: #f6fcfd;
-  --vz-grid: #cfe3e9;
-  --vz-axis: #b1cbd3;
+  --bg-grad: linear-gradient(180deg, #e9f5f6 0%, #d9ecee 100%);
+  --bg-end: #e4f1f2;
+  --ink: #0f2a2e; --muted: #4d6b70; --line: rgba(15, 42, 46, 0.13);
+  --accent: linear-gradient(135deg, #0f8b8d, #2bb3b5);
+  --accent2: linear-gradient(135deg, #0f8b8d, #2bb3b5);
+  --accent-solid: #0f8b8d; --accsoft: rgba(15, 139, 141, 0.15);
+  --blue: #0f8b8d; --score: #0f8b8d; --ex-border: #1a9a9c; --surface: #fbffff;
+  --vz-grid: #cfe3e5; --vz-axis: #b1cbce;
 }
 body.theme-forest, .pv.theme-forest {
-  --bg-grad: linear-gradient(180deg, #eaf3e7 0%, #dae7d6 100%);
-  --bg-end: #dae7d6;
-  --accent: linear-gradient(135deg, #2f7d4f, #4aa36b);
-  --accent2: linear-gradient(135deg, #2f7d4f, #4aa36b);
-  --accent-solid: #3a8f5c;
-  --blue: #2f7d4f;
-  --score: #2f7d4f;
-  --ex-border: #3f945f;
-  --surface: #f8fcf6;
-  --vz-grid: #d3e2cf;
-  --vz-axis: #b8cdb3;
+  --bg-grad: linear-gradient(180deg, #eef3eb 0%, #dfe8db 100%);
+  --bg-end: #e9efe6;
+  --ink: #1a2a1c; --muted: #58705a; --line: rgba(26, 42, 28, 0.13);
+  --accent: linear-gradient(135deg, #3b7a3f, #5aa05e);
+  --accent2: linear-gradient(135deg, #3b7a3f, #5aa05e);
+  --accent-solid: #3b7a3f; --accsoft: rgba(59, 122, 63, 0.15);
+  --blue: #3b7a3f; --score: #3b7a3f; --ex-border: #478a4b; --surface: #fbfdf9;
+  --vz-grid: #d3e0cf; --vz-axis: #b8ccb4;
 }
-html:has(body.theme-oceano) { background: #d3e8ee; }
-html:has(body.theme-forest) { background: #dae7d6; }
+body, .pv { --accsoft: rgba(44, 107, 199, 0.14); }
+body.theme-dark, .pv.theme-dark { --accsoft: rgba(106, 166, 255, 0.18); }
+body.theme-sport, .pv.theme-sport { --accsoft: rgba(232, 89, 12, 0.14); }
+html:has(body.theme-oceano) { background: #e4f1f2; }
+html:has(body.theme-forest) { background: #e9efe6; }
 body.theme-oceano .wk.done .wkd, body.theme-forest .wk.done .wkd { background: var(--accent-solid); border-color: var(--accent-solid); }
 
 /* densità compatta */
-body.dens-compatta .card, body.dens-compatta .hero { padding: 12px 14px; margin-bottom: 10px; }
+body.dens-compatta .home, body.dens-compatta .home-grid { gap: 8px; }
+body.dens-compatta .card, body.dens-compatta .hero { padding: 11px 13px; margin-bottom: 8px; }
 body.dens-compatta .exercise { padding: 8px 10px 4px; margin-bottom: 8px; }
 body.dens-compatta .meal-card { padding: 2px 10px 6px; margin-bottom: 8px; }
-body.dens-compatta .big-btn { padding: 12px; }
+body.dens-compatta .big-btn { padding: 11px; }
 body.dens-compatta .quick { padding: 8px 12px 10px; }
 body.dens-compatta .setting { margin: 4px 0; }
 body.dens-compatta .btn { min-height: 44px; }
 
 /* forme delle card */
 body.shape-quadrate .card, body.shape-quadrate .hero, body.shape-quadrate .exercise, body.shape-quadrate .meal-card, body.shape-quadrate .weekcard,
-body.shape-quadrate .emptycard, body.shape-quadrate .quick, body.shape-quadrate .big-btn, body.shape-quadrate .sheet, body.shape-quadrate .fcard { border-radius: 6px; }
-body.shape-quadrate .btn, body.shape-quadrate .seg, body.shape-quadrate .seg button, body.shape-quadrate .mini-toggle, body.shape-quadrate .chip { border-radius: 6px; }
+body.shape-quadrate .emptycard, body.shape-quadrate .quick, body.shape-quadrate .big-btn, body.shape-quadrate .sheet, body.shape-quadrate .fcard { border-radius: 8px; }
+body.shape-quadrate .btn, body.shape-quadrate .seg, body.shape-quadrate .seg button, body.shape-quadrate .mini-toggle, body.shape-quadrate .chip { border-radius: 8px; }
 body.shape-piatte { --shadow: none; }
 body.shape-piatte .card, body.shape-piatte .hero, body.shape-piatte .exercise, body.shape-piatte .meal-card, body.shape-piatte .weekcard,
-body.shape-piatte .emptycard, body.shape-piatte .quick, body.shape-piatte .big-btn { box-shadow: none; border: 1px solid var(--line); background: transparent; }
+body.shape-piatte .emptycard, body.shape-piatte .quick, body.shape-piatte .big-btn { box-shadow: none; border-radius: 16px; }
+body.shape-piatte .big-btn { border: 0; background: var(--accsoft); }
 
 /* stili della settimana */
 .wk-bars .wkrow { align-items: stretch; }
@@ -776,7 +775,7 @@ body.shape-piatte .emptycard, body.shape-piatte .quick, body.shape-piatte .big-b
 .wkbar { height: 6px; border-radius: 6px; background: var(--line); margin-top: 8px; overflow: hidden; }
 .wkbar i { display: block; height: 100%; background: var(--accent-solid, var(--green)); border-radius: 6px; }
 @media (max-height: 799px) {
-  .wk.wkb { height: 46px; }
+  .wk.wkb { height: 38px; }
   .wm { width: 9px; height: 9px; }
   .wk-month { padding: 2px 10px; }
   .wmgrid { gap: 2px; }
@@ -812,3 +811,47 @@ body.shape-piatte .emptycard, body.shape-piatte .quick, body.shape-piatte .big-b
 .qlinks { display: flex; gap: 4px; }
 .qlink { min-height: 0; line-height: 1.2; background: none; border: 0; padding: 4px 8px; font-weight: 800; font-size: .8rem; letter-spacing: 0; text-transform: none; color: var(--accent-solid, var(--blue)); }
 .qlink.due { background: var(--chip); border-radius: 999px; border: 1px solid var(--accent-solid, var(--blue)); }
+
+/* 2.3: stili della settimana come nell'anteprima */
+.wkb .wbar { width: 100%; border-radius: 8px 8px 4px 4px; }
+.wk.wkb { padding: 0 3px; }
+.wk-bars .wkrow { gap: 8px; }
+.wk-bars .wkstats { justify-content: center; }
+.wk-rings .rings { display: flex; align-items: center; gap: 16px; padding: 4px 6px; }
+.wk-rings svg { width: 112px; height: 112px; flex: none; }
+.rgb { fill: none; stroke: var(--line); stroke-width: 9; }
+.rgf { fill: none; stroke-width: 9; stroke-linecap: round; }
+.rl { display: flex; flex-direction: column; gap: 8px; font-size: .88rem; font-weight: 700; color: var(--muted); }
+.rl b { color: var(--ink); font-size: 1.15rem; }
+.wk-min { padding: 14px 16px; }
+.wk-min .min { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1.15; }
+.wk-min small { display: block; font-size: .9rem; color: var(--muted); font-weight: 700; letter-spacing: 0; margin-top: 6px; }
+.mhead { display: flex; justify-content: space-between; align-items: center; font-weight: 800; margin-bottom: 6px; text-transform: capitalize; }
+.mon { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; font-size: .75rem; text-align: center; font-weight: 800; }
+.mon > span { color: var(--muted); }
+.wmc { height: 32px; min-height: 0; padding: 0; border: 0; background: none; border-radius: 10px; font-weight: 800; font-size: .82rem; position: relative; color: var(--ink); }
+.wmc.d { background: var(--accent-solid, var(--blue)); color: #fff; }
+.wmc.t { outline: 2px solid var(--accent-solid, var(--blue)); }
+.wmc.s::after { content: ''; position: absolute; bottom: 3px; left: 50%; margin-left: -2.5px; width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+.wmc.d.s::after { background: #fff; }
+@media (max-height: 799px) {
+  .wk-rings svg { width: 68px; height: 68px; }
+  .wk-rings .rings { padding: 0 6px; }
+  .rl { gap: 4px; }
+  .wmc { height: 24px; }
+  .wk-min { padding: 8px 14px; }
+  .wk-min .min { font-size: 1.2rem; }
+  .wk-bars .wkstats { display: flex; font-size: .75rem; }
+}
+/* 2.3: elenco delle impostazioni */
+.setlist { padding: 4px 14px; }
+.setrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 14px 0; text-align: left; min-height: 56px; }
+.setrow:last-child { border-bottom: 0; }
+.setrow b { display: block; font-size: 1.05rem; font-weight: 800; }
+.setrow small { display: block; color: var(--muted); font-weight: 600; font-size: .85rem; margin-top: 2px; }
+.setrow svg { width: 20px; height: 20px; flex: none; fill: none; stroke: var(--muted); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-height: 880px) { .wk-rings svg { width: 96px; height: 96px; } }
+@media (max-height: 799px) { .wk-rings svg { width: 68px; height: 68px; } }
+@media (max-height: 799px) { .wk-rings svg { width: 52px; height: 52px; } .rl { font-size: .78rem; gap: 2px; } .rl b { font-size: 1rem; } }
+@media (max-height: 799px) { .wk-rings svg { width: 46px; height: 46px; } }
+@media (max-height: 799px) { .rl { line-height: 1.15; } .wk-rings .rings { gap: 12px; } }

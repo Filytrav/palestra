@@ -4,7 +4,7 @@
 const D = window.APP_DATA;
 const VZ = window.VZ;
 const KEY = 'palestra.v1';      // stessa chiave delle versioni precedenti: i dati si conservano
-const VERSION = '2.2';
+const VERSION = '2.3';
 
 /* ---------- utilità ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -958,11 +958,11 @@ const weightForm = cur => `<div class="inline"><label class="field"><input id="w
 
 /* ---------- schermata: Anteprima stili ---------- */
 const THEMES = [
-  { id: 'apple', name: 'Apple-like', desc: 'Chiaro, con azzurro e card bianche, come nell\'anteprima della home.' },
-  { id: 'dark', name: 'Scuro', desc: 'Sfondo scuro con il verde in evidenza, comodo la sera.' },
+  { id: 'apple', name: 'Azzurro', desc: 'Chiaro, con azzurro e card bianche, come nell\'anteprima della home.' },
+  { id: 'dark', name: 'Notte', desc: 'Sfondo scuro con il verde in evidenza, comodo la sera.' },
   { id: 'sport', name: 'Sport', desc: 'Toni caldi, con arancio e rosso.' },
   { id: 'oceano', name: 'Oceano', desc: 'Azzurro petrolio, fresco e pulito.' },
-  { id: 'forest', name: 'Foresta', desc: 'Verdi naturali, riposante.' }
+  { id: 'forest', name: 'Forest', desc: 'Verdi naturali, riposante.' }
 ];
 
 function previewHtml(id) {
@@ -1487,32 +1487,6 @@ function renderRegistro() {
   }).join('')}</section>`;
 }
 
-function renderDati() {
-  return `<section class="card"><h2>Preferenze</h2>
-      <label class="setting"><span>Recupero tra le serie</span>
-        <select data-chg="rest" aria-label="Secondi di recupero">${[...new Set([30, 45, 60, 75, 90, 105, 120, 150, 180, 240, 300, S.settings.rest])].sort((a, b) => a - b).map(s => `<option value="${s}"${S.settings.rest === s ? ' selected' : ''}>${recText(s)}</option>`).join('')}</select></label>
-      <label class="setting"><span>Suono a fine recupero</span>
-        <select data-chg="sound" aria-label="Suono a fine recupero"><option value="1"${S.settings.sound ? ' selected' : ''}>Attivo</option><option value="0"${S.settings.sound ? '' : ' selected'}>Disattivo</option></select></label>
-      <div class="btns"><button class="btn" data-act="beeptest">Prova il suono</button></div>
-    </section>
-    ${aspettoCard()}${obiettiviCard()}
-    <section class="card"><h2>Esporta in Excel</h2>
-      <p class="sub tight">File CSV con il separatore punto e virgola e i decimali con la virgola, pronti da aprire in Excel.</p>
-      <div class="btns"><button class="btn" data-act="csv" data-v="serie">Serie e allenamenti</button>
-        <button class="btn" data-act="csv" data-v="corpo">Peso e misure</button>
-        <button class="btn" data-act="csv" data-v="pasti">Pasti e creatina</button></div>
-    </section>
-    <section class="card"><h2>I tuoi dati</h2>
-      ${(() => { const z = dataSizeText(); return `<p class="sub tight${z.warn ? ' warn' : ''}">Spazio usato: ${z.text}${z.warn ? '. Sta diventando molto: esporta un backup e valuta di ripristinare.' : '.'}</p>`; })()}
-      <p class="sub tight">I dati restano su questo telefono. Salva ogni tanto un backup.${S.settings.lastBackup ? ` Ultimo backup: ${esc(longDate(S.settings.lastBackup))}.` : ' Non hai ancora salvato un backup.'}</p>
-      <div class="btns"><button class="btn" data-act="export">Esporta il backup</button>
-        <label class="btn">Importa un backup<input type="file" accept="application/json,.json" data-chg="import" hidden></label>
-        <button class="btn" data-act="forceupd">Controlla aggiornamenti</button>
-        <button class="btn" data-act="tutor">Rivedi il tutorial</button>
-        <button class="btn danger" data-act="reset">Ripristina i dati di base</button></div>
-    </section>
-    <p class="sub">Palestra, versione ${VERSION}</p>`;
-}
 
 /* ---------- disegno ---------- */
 const screens = { oggi: renderOggi, scheda: renderScheda, dieta: renderDieta, spesa: renderSpesa, storico: renderStorico };
@@ -2473,7 +2447,7 @@ Object.assign(I, {
 const WEEK_LABELS = { dots: 'Pallini', barre: 'Barre', mese: 'Mese', anelli: 'Anelli', minimal: 'Minimale' };
 const DENS_LABELS = { comoda: 'Comoda', compatta: 'Compatta' };
 const SHAPE_LABELS = { tonde: 'Tonde', quadrate: 'Quadrate', piatte: 'Piatte' };
-const THEME_LABELS = { apple: 'Apple-like', dark: 'Scuro', sport: 'Sport', oceano: 'Oceano', forest: 'Foresta' };
+
 
 function weekData() {
   const t = todayKey(), mon = addDays(t, -wdIndex(fromKey(t)));
@@ -2521,42 +2495,39 @@ function weekDots() {
   return `<section class="weekcard wk-dots" aria-label="Questa settimana"><div class="wkrow">${cells}</div><div class="wkstats">${weekBits(wd)}</div></section>`;
 }
 function weekBars() {
-  const wd = weekData(), mx = Math.max(1, ...wd.days.map(d => d.vol));
+  const wd = weekData(), mx = Math.max(1, ...wd.days.map(d => d.vol)), tot = wd.days.reduce((a, d) => a + d.vol, 0);
   const cells = wd.days.map(d => {
-    const h = d.dn ? Math.max(14, Math.round(d.vol / mx * 100)) : (d.train ? 14 : 6);
+    const h = d.dn ? Math.max(14, Math.round(d.vol / mx * 100)) : 8;
     return wkBtn(d, wd.t, `<i class="wbar" style="height:${h}%"></i><span class="wl">${d.l}</span>`, 'wk wkb');
   }).join('');
-  return `<section class="weekcard wk-bars" aria-label="Questa settimana, volume per giorno"><div class="wkrow">${cells}</div><div class="wkstats">${weekBits(wd)}</div></section>`;
+  return `<section class="weekcard wk-bars" aria-label="Questa settimana, volume per giorno"><div class="wkrow">${cells}</div><div class="wkstats"><span>Volume della settimana <b>${fmtInt(tot)}</b> kg</span></div></section>`;
 }
 function weekMonth() {
-  const t = todayKey(), mon = addDays(t, -wdIndex(fromKey(t))), start = addDays(mon, -21);
+  const t = todayKey(), ym = t.slice(0, 7), [Y, M] = ym.split('-').map(Number), n = new Date(Y, M, 0).getDate(), lead = wdIndex(fromKey(ym + '-01'));
   const cells = [];
-  for (let i = 0; i < 28; i++) {
-    const k = addDays(start, i), train = dayType(k) === 'train', dn = hasDone(S.days[k]);
-    const st = dn ? 'done' : train ? (k >= t ? 'plan' : 'miss') : 'rest';
-    cells.push(`<button class="wm ${st}${k === t ? ' today' : ''}" data-act="wkday" data-k="${k}" aria-label="${esc(stDesc({ k, st }))}"></button>`);
+  for (let i = 0; i < lead; i++) cells.push('<b class="z"></b>');
+  for (let d = 1; d <= n; d++) {
+    const k = `${ym}-${pad(d)}`, dn = hasDone(S.days[k]), dot = k <= t && mealDot(k) === 'ok';
+    cells.push(`<button class="wmc${dn ? ' d' : ''}${k === t ? ' t' : ''}${dot ? ' s' : ''}" data-act="wkday" data-k="${k}" aria-label="${esc(stDesc({ k, st: dn ? 'done' : dayType(k) === 'train' ? (k >= t ? 'plan' : 'miss') : 'rest' }))}">${d}</button>`);
   }
-  const wd = weekData();
-  return `<section class="weekcard wk-month" aria-label="Ultime quattro settimane"><div class="wmgrid">${cells.join('')}</div><div class="wkstats">${weekBits(wd)}</div></section>`;
-}
-function ringSvg(p, label, val, cls) {
-  const R = 20, C = 2 * Math.PI * R, f = Math.max(0, Math.min(1, p));
-  return `<div class="rg ${cls}"><svg viewBox="0 0 50 50" aria-hidden="true"><circle cx="25" cy="25" r="${R}" class="rgb"/><circle cx="25" cy="25" r="${R}" class="rgf" stroke-dasharray="${(C * f).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 25 25)"/></svg><b>${val}</b><small>${label}</small></div>`;
+  const title = fromKey(ym + '-01').toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+  return `<section class="weekcard wk-month" aria-label="Il mese"><div class="mhead"><span>${esc(title)}</span><button class="qlink" data-act="wkday" data-k="${t}">Apri</button></div><div class="mon">${['L', 'M', 'M', 'G', 'V', 'S', 'D'].map(l => `<span>${l}</span>`).join('')}${cells.join('')}</div></section>`;
 }
 function weekRings() {
   const wd = weekData(), g = S.settings.goals, tgt = g.sessions || wd.planned || 1;
   const t = wd.t, type = dayType(t), meals = D.diet[type].meals, rec = S.days[t];
   const md = meals.filter(m => rec && rec.meals && rec.meals[m.id]).length;
   const e = eatenNutrition(rec, type), gp = g.protein || e.goalP || 1;
-  return `<section class="weekcard wk-rings" aria-label="Anelli di oggi e della settimana"><div class="rgrow">
-    ${ringSvg(wd.done / tgt, 'sedute', `${wd.done}/${tgt}`, 'r1')}
-    ${ringSvg(meals.length ? md / meals.length : 0, 'pasti oggi', `${md}/${meals.length}`, 'r2')}
-    ${ringSvg(e.p / gp, 'proteine', `${fmtInt(e.p)}`, 'r3')}</div></section>`;
+  const ring = (r, p, c) => { const C = 2 * Math.PI * r; return `<circle cx="56" cy="56" r="${r}" class="rgb"/><circle cx="56" cy="56" r="${r}" class="rgf" style="stroke:${c}" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * (1 - Math.max(0, Math.min(1, p)))).toFixed(1)}" transform="rotate(-90 56 56)"/>`; };
+  return `<section class="weekcard wk-rings" aria-label="Anelli: sedute, pasti e proteine"><div class="rings"><svg viewBox="0 0 112 112" aria-hidden="true">${ring(48, wd.done / tgt, 'var(--accent-solid, var(--blue))')}${ring(36, meals.length ? md / meals.length : 0, 'var(--green)')}${ring(24, e.p / gp, '#e8a33c')}</svg>
+    <div class="rl"><span><b>${wd.done}</b>/${tgt} allenamenti</span><span><b>${md}</b>/${meals.length} pasti</span><span><b>${fmtInt(e.p)}</b>/${fmtInt(gp)} g proteine</span></div></div></section>`;
 }
 function weekMin() {
-  const wd = weekData(), g = S.settings.goals, tgt = g.sessions || wd.planned || 1, sn = streakDays();
-  const p = Math.min(100, Math.round(wd.done / tgt * 100));
-  return `<section class="weekcard wk-min" aria-label="Questa settimana"><p><b>${wd.done}</b> di ${tgt} sedute · <b>${sn}</b> ${sn === 1 ? 'giorno' : 'giorni'} di fila</p><div class="wkbar"><i style="width:${p}%"></i></div></section>`;
+  const t = todayKey(), type = dayType(t), train = type === 'train', w = workoutFor(t), pr = workoutProgress(t, w), meals = D.diet[type].meals, rec = S.days[t];
+  const md = meals.filter(m => rec && rec.meals && rec.meals[m.id]).length;
+  const day = DAYS_FULL[wdIndex(fromKey(t))];
+  const small = [train ? w.name : '', train && pr.total ? `${pr.done} serie su ${pr.total}` : '', `${md} pasti su ${meals.length}`].filter(Boolean).join(' · ');
+  return `<section class="weekcard wk-min" aria-label="Oggi"><div class="min">${esc(day[0].toUpperCase() + day.slice(1))}, ${train ? 'giorno di allenamento' : 'giorno di riposo'}<small>${esc(small)}</small></div></section>`;
 }
 function weekStrip() {
   return ({ dots: weekDots, barre: weekBars, mese: weekMonth, anelli: weekRings, minimal: weekMin }[S.settings.look.week] || weekDots)();
@@ -2820,28 +2791,72 @@ Object.assign(I, {
   wknote(el) { S.weekNotes ||= {}; const v = el.value.trim().slice(0, 300); if (v) S.weekNotes[el.dataset.k] = v; else delete S.weekNotes[el.dataset.k]; save(); },
   dsearch(el) { ui.dq = el.value; const r = $('#dsres'); if (r) r.innerHTML = diarioSearch(ui.dq); }
 });
-function aspettoCard() {
-  const grp = (f, labels, label) => `<div class="lookgrp"><span>${label}</span><div class="chips">${Object.keys(labels).map(id => `<button class="chip${S.settings.look[f] === id ? ' on' : ''}" data-act="lookset" data-f="${f}" data-v="${id}" aria-pressed="${S.settings.look[f] === id}">${labels[id]}</button>`).join('')}</div></div>`;
-  return `<section class="card"><h2>Aspetto</h2>
-    <label class="setting"><span>Colori</span><select data-chg="theme" aria-label="Colori dell'app">${THEME_IDS.map(id => `<option value="${id}"${S.settings.theme === id ? ' selected' : ''}>${THEME_LABELS[id]}</option>`).join('')}</select></label>
-    ${grp('week', WEEK_LABELS, 'Settimana in Home')}${grp('dens', DENS_LABELS, 'Densità')}${grp('shape', SHAPE_LABELS, 'Forma delle card')}
-    <div class="btns"><button class="btn" data-act="stview" data-v="stili">Anteprima stili</button></div></section>`;
+/* ---- Dati: elenco di sezioni ---- */
+const THEME_NAMES = { apple: 'Azzurro', dark: 'Notte', sport: 'Sport', oceano: 'Oceano', forest: 'Forest' };
+const setCard = html => `<section class="card">${html}</section>`;
+function secAspetto() {
+  const L = S.settings.look;
+  const grp = (f, labels, label) => `<div class="lookgrp"><span>${label}</span><div class="chips">${Object.keys(labels).map(id => `<button class="chip${L[f] === id ? ' on' : ''}" data-act="lookset" data-f="${f}" data-v="${id}" aria-pressed="${L[f] === id}">${labels[id]}</button>`).join('')}</div></div>`;
+  return setCard(`<div class="lookgrp"><span>Colore</span><div class="chips">${THEME_IDS.map(id => `<button class="chip${S.settings.theme === id ? ' on' : ''}" data-act="settheme" data-v="${id}" aria-pressed="${S.settings.theme === id}">${THEME_NAMES[id]}</button>`).join('')}</div></div>
+    ${grp('week', WEEK_LABELS, 'Stile della settimana')}${grp('dens', DENS_LABELS, 'Densità')}${grp('shape', SHAPE_LABELS, 'Forma delle card')}
+    <p class="sub tight">Lo stile "Mese" occupa più spazio: la Home può scorrere.</p>`);
 }
-function obiettiviCard() {
-  const g = S.settings.goals, r = S.settings.rem;
+function secAllenamento() {
+  return setCard(`<label class="setting"><span>Recupero tra le serie</span>
+      <select data-chg="rest" aria-label="Secondi di recupero">${[...new Set([30, 45, 60, 75, 90, 105, 120, 150, 180, 240, 300, S.settings.rest])].sort((a, b) => a - b).map(s => `<option value="${s}"${S.settings.rest === s ? ' selected' : ''}>${recText(s)}</option>`).join('')}</select></label>
+    <label class="setting"><span>Suono a fine recupero</span>
+      <select data-chg="sound" aria-label="Suono a fine recupero"><option value="1"${S.settings.sound ? ' selected' : ''}>Attivo</option><option value="0"${S.settings.sound ? '' : ' selected'}>Disattivo</option></select></label>
+    <div class="btns"><button class="btn" data-act="beeptest">Prova il suono</button></div>
+    <p class="sub tight">Il recupero di ogni esercizio si cambia in Scheda.</p>`);
+}
+function secObiettivi() {
+  const g = S.settings.goals;
   const sel = (f, vals, cur, fmt) => `<select data-chg="goal" data-f="${f}" aria-label="${f}">${vals.map(v => `<option value="${v}"${cur === v ? ' selected' : ''}>${fmt(v)}</option>`).join('')}</select>`;
-  const chk = (f, l, tf) => `<label class="setting"><span>${l}</span><span class="remrow"><input type="checkbox" data-chg="rem" data-f="${f}"${r[f] ? ' checked' : ''} aria-label="${l}">${tf ? `<input type="time" data-chg="rem" data-f="${tf}" value="${esc(r[tf])}" aria-label="Ora: ${l}">` : ''}</span></label>`;
-  return `<section class="card"><h2>Obiettivi</h2>
-    <label class="setting"><span>Sedute a settimana</span>${sel('sessions', [0, 1, 2, 3, 4, 5, 6, 7], g.sessions, v => v ? String(v) : 'Come da piano')}</label>
+  return setCard(`<label class="setting"><span>Sedute a settimana</span>${sel('sessions', [0, 1, 2, 3, 4, 5, 6, 7], g.sessions, v => v ? String(v) : 'Come da piano')}</label>
     <label class="setting"><span>Proteine al giorno</span>${sel('protein', [0, 80, 100, 120, 140, 160, 180, 200], g.protein, v => v ? v + ' g' : 'Non mostrare')}</label>
-    <label class="setting"><span>Giorno della pesata</span><select data-chg="weighday" aria-label="Giorno della pesata"><option value="-1"${S.settings.weighDay < 0 ? ' selected' : ''}>Mai</option>${DAYS_FULL.map((d, i) => `<option value="${i}"${S.settings.weighDay === i ? ' selected' : ''}>${d}</option>`).join('')}</select></label>
-  </section>
-  <section class="card"><h2>Promemoria</h2>
-    <p class="sub tight">Su iPhone una web app non può inviare notifiche. Scarica un file per il Calendario: gli eventi si ripetono ogni settimana con un avviso.</p>
-    ${chk('trainOn', 'Allenamento', 'train')}${chk('weighOn', 'Pesata', 'weigh')}${chk('creaOn', 'Creatina', 'crea')}${chk('mealsOn', 'Pasti agli orari del piano', null)}
-    <div class="btns"><button class="btn solid" data-act="icsget">Scarica per il Calendario</button></div></section>`;
+    <label class="setting"><span>Giorno della pesata</span><select data-chg="weighday" aria-label="Giorno della pesata"><option value="-1"${S.settings.weighDay < 0 ? ' selected' : ''}>Mai</option>${DAYS_FULL.map((d, i) => `<option value="${i}"${S.settings.weighDay === i ? ' selected' : ''}>${d}</option>`).join('')}</select></label>`);
 }
-
+function secPromemoria() {
+  const r = S.settings.rem;
+  const chk = (f, l, tf) => `<label class="setting"><span>${l}</span><span class="remrow"><input type="checkbox" data-chg="rem" data-f="${f}"${r[f] ? ' checked' : ''} aria-label="${l}">${tf ? `<input type="time" data-chg="rem" data-f="${tf}" value="${esc(r[tf])}" aria-label="Ora: ${l}">` : ''}</span></label>`;
+  return setCard(`<p class="sub tight">Su iPhone una web app non può inviare notifiche. Scarica un file per il Calendario: gli eventi si ripetono ogni settimana con un avviso.</p>
+    ${chk('trainOn', 'Allenamento', 'train')}${chk('weighOn', 'Pesata', 'weigh')}${chk('creaOn', 'Creatina', 'crea')}${chk('mealsOn', 'Pasti agli orari del piano', null)}
+    <div class="btns"><button class="btn solid" data-act="icsget">Scarica per il Calendario</button></div>`);
+}
+function secExcel() {
+  return setCard(`<p class="sub tight">File CSV con il separatore punto e virgola e i decimali con la virgola, pronti da aprire in Excel.</p>
+    <div class="btns"><button class="btn" data-act="csv" data-v="serie">Serie e allenamenti</button>
+      <button class="btn" data-act="csv" data-v="corpo">Peso e misure</button>
+      <button class="btn" data-act="csv" data-v="pasti">Pasti e creatina</button></div>`);
+}
+function secBackup() {
+  const z = dataSizeText();
+  return setCard(`<p class="sub tight${z.warn ? ' warn' : ''}">Spazio usato: ${z.text}${z.warn ? '. Sta diventando molto: esporta un backup e valuta di ripristinare.' : '.'}</p>
+    <p class="sub tight">I dati restano su questo telefono. Salva ogni tanto un backup.${S.settings.lastBackup ? ` Ultimo backup: ${esc(longDate(S.settings.lastBackup))}.` : ' Non hai ancora salvato un backup.'}</p>
+    <div class="btns"><button class="btn" data-act="export">Esporta il backup</button>
+      <label class="btn">Importa un backup<input type="file" accept="application/json,.json" data-chg="import" hidden></label>
+      <button class="btn danger" data-act="reset">Ripristina i dati di base</button></div>`);
+}
+function secInfo() {
+  return setCard(`<p class="sub tight">Palestra, versione ${VERSION}.</p>
+    <p class="sub tight">Se su Safari vedi una versione vecchia, controlla gli aggiornamenti.</p>
+    <div class="btns"><button class="btn" data-act="forceupd">Controlla aggiornamenti</button><button class="btn" data-act="tutor">Rivedi il tutorial</button></div>`);
+}
+const SET_SECS = [
+  ['aspetto', 'Aspetto', () => `${THEME_NAMES[S.settings.theme]} · settimana ${WEEK_LABELS[S.settings.look.week].toLowerCase()}`, secAspetto],
+  ['allenamento', 'Allenamento', () => `Recupero ${recText(S.settings.rest)} · suono ${S.settings.sound ? 'attivo' : 'spento'}`, secAllenamento],
+  ['obiettivi', 'Obiettivi e pesata', () => { const g = S.settings.goals; return [g.sessions ? `${g.sessions} sedute` : 'sedute come da piano', g.protein ? `${g.protein} g proteine` : ''].filter(Boolean).join(' · '); }, secObiettivi],
+  ['promemoria', 'Promemoria', () => { const r = S.settings.rem, n = ['trainOn', 'weighOn', 'creaOn', 'mealsOn'].filter(f => r[f]).length; return `${n} attiv${n === 1 ? 'o' : 'i'}, per il Calendario`; }, secPromemoria],
+  ['excel', 'Esporta in Excel', () => 'Serie, peso e misure, pasti', secExcel],
+  ['backup', 'Backup e dati', () => S.settings.lastBackup ? `Ultimo backup: ${longDate(S.settings.lastBackup)}` : 'Nessun backup salvato', secBackup],
+  ['info', 'Informazioni', () => `Versione ${VERSION}`, secInfo]
+];
+function renderDati() {
+  const cur = SET_SECS.find(x => x[0] === ui.setSec);
+  if (cur) return `<div class="subhead"><button class="back" data-act="setsec" data-v="" aria-label="Torna alle impostazioni">${svg(ICON.back)}</button><h1 class="date">${cur[1]}</h1></div>${cur[3]()}`;
+  return `<section class="card setlist">${SET_SECS.map(x => `<button class="setrow" data-act="setsec" data-v="${x[0]}"><span><b>${x[1]}</b><small>${esc(x[2]())}</small></span>${svg('<path d="M9 6l6 6-6 6"/>')}</button>`).join('')}</section>`;
+}
+Object.assign(A, { setsec(el) { ui.setSec = el.dataset.v || null; render(false); } });
 function importCard() {
   return `<section class="card"><h2>Importa una scheda</h2><p class="sub tight">Da un file o da un codice che ti ha inviato qualcuno.</p>
     <div class="btns"><label class="btn">Da file<input type="file" accept="application/json,.json" data-chg="wimport" hidden></label><button class="btn" data-act="wcodeask">Incolla un codice</button></div></section>`;

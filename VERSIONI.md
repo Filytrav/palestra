@@ -3,7 +3,19 @@
 > **Nota: ad ogni aggiornamento della app, aggiornare questo file.**
 > Aggiungi in cima una nuova sezione con numero di versione, data e l'elenco di cosa è stato aggiunto, cambiato o corretto. Le versioni più recenti stanno in alto.
 
-Versione attuale: **2.2**
+Versione attuale: **2.3**
+
+---
+
+## Versione 2.3 (16/11/2026)
+
+Correzione
+- **Stili come nell'anteprima**: nella 2.2 gli stili della settimana e i colori erano diversi da quelli mostrati nell'anteprima. Ora sono gli stessi: anelli concentrici con legenda (allenamenti, pasti, proteine), mese a calendario con "Apri", barre del volume con il totale della settimana, minimale con la frase del giorno; colori Azzurro, Notte, Oceano, Forest, Sport; forme e densità come in anteprima (con "piatte" i riquadri Allenamento e Dieta sono colorati senza bordo).
+- Lo stile "Mese" occupa più spazio: la Home può scorrere.
+
+Cambiato
+- **Dati riordinato in sezioni**: Aspetto, Allenamento (recupero e suono), Obiettivi e pesata, Promemoria, Esporta in Excel, Backup e dati, Informazioni. Ogni voce mostra un riassunto e si apre in una pagina con la freccia per tornare indietro.
+- Tolto il tasto "Anteprima stili": le scelte si vedono subito sull'app.
 
 ---
 

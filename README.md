@@ -45,3 +45,7 @@ Cambio ordine degli esercizi (anche in modalità serie) e allenamento libero. Pu
 
 ## 2.2
 Aspetto personalizzabile (5 stili settimana, 5 colori, densità, forme), obiettivi, riepilogo settimanale, ricerca nel Diario, cronometro, pesata, superset, condivisione schede, promemoria .ics.
+
+
+## 2.3
+Stili della settimana e colori come nell'anteprima; Dati riordinato in sezioni.

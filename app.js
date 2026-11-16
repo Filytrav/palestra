@@ -4,7 +4,7 @@
 const D = window.APP_DATA;
 const VZ = window.VZ;
 const KEY = 'palestra.v1';      // stessa chiave delle versioni precedenti: i dati si conservano
-const VERSION = '2.1.1';
+const VERSION = '2.2';
 
 /* ---------- utilità ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -63,12 +63,23 @@ function toVariants(s, ex, variants) {
 }
 
 /* ---------- stato salvato nel telefono ---------- */
+const THEME_IDS = ['apple', 'dark', 'sport', 'oceano', 'forest'];
 const WEEK_DEFAULT = ['rest', 'train', 'rest', 'train', 'rest', 'train', 'rest'];
 
 function migrate(s) {
   s = (s && typeof s === 'object') ? s : {};
   s.settings = Object.assign({ rest: 90, theme: 'apple', sound: true }, s.settings);
-  if (!['apple', 'dark', 'sport'].includes(s.settings.theme)) s.settings.theme = 'apple';
+  if (!THEME_IDS.includes(s.settings.theme)) s.settings.theme = 'apple';
+  s.settings.look = Object.assign({ week: 'dots', dens: 'comoda', shape: 'tonde' }, s.settings.look);
+  if (!['dots', 'barre', 'mese', 'anelli', 'minimal'].includes(s.settings.look.week)) s.settings.look.week = 'dots';
+  if (!['comoda', 'compatta'].includes(s.settings.look.dens)) s.settings.look.dens = 'comoda';
+  if (!['tonde', 'quadrate', 'piatte'].includes(s.settings.look.shape)) s.settings.look.shape = 'tonde';
+  s.settings.goals = Object.assign({ sessions: 0, protein: 0 }, s.settings.goals);
+  s.settings.goals.sessions = Math.max(0, Math.min(7, +s.settings.goals.sessions || 0));
+  s.settings.goals.protein = Math.max(0, Math.min(400, +s.settings.goals.protein || 0));
+  s.settings.weighDay = Number.isInteger(s.settings.weighDay) && s.settings.weighDay >= -1 && s.settings.weighDay <= 6 ? s.settings.weighDay : 5;
+  s.settings.rem = Object.assign({ trainOn: true, train: '18:30', weighOn: true, weigh: '08:00', creaOn: false, crea: '09:00', mealsOn: false }, s.settings.rem);
+  s.weekNotes = s.weekNotes && typeof s.weekNotes === 'object' ? s.weekNotes : {};
   s.shop = Object.assign({ bought: {}, have: {} }, s.shop);
   s.shop.bought ||= {}; s.shop.have ||= {};
   s.choices ||= {}; s.toppings ||= {}; s.days ||= {};
@@ -232,15 +243,6 @@ function workoutProgress(k, w) {
   return { total, done };
 }
 
-function nextSet(k, w) {
-  for (const ex of w.exercises) {
-    const v = selVariant(k, ex), p = plan(ex, v), key = skey(ex, v);
-    const n = rowCount(k, key, p), arr = getSets(k, key);
-    for (let i = 0; i < n; i++) if (!(arr[i] && arr[i].done)) return { name: p.name, i, ex, v, key, p };
-  }
-  return null;
-}
-
 function metaText(pr, nx) {
   if (nx) return `Prossima serie: ${nx.name}, serie ${nx.i + 1}. Recupero ${recText(restFor(nx.ex))}.`;
   return pr.total ? 'Allenamento completato. Ottimo lavoro.' : `Recupero ${recText(S.settings.rest)}.`;
@@ -388,27 +390,6 @@ function streakDays() {
   while (hasActivity(S.days[k]) && n < 3650) { n++; k = addDays(k, -1); }
   return n;
 }
-function weekStrip() {
-  const t = todayKey(), mon = addDays(t, -wdIndex(fromKey(t)));
-  const L = ['L', 'M', 'M', 'G', 'V', 'S', 'D'];
-  let planned = 0, done = 0;
-  const cells = L.map((l, i) => {
-    const k = addDays(mon, i), train = dayType(k) === 'train', dn = hasDone(S.days[k]);
-    if (train) planned++;
-    if (dn) done++;
-    const st = dn ? 'done' : train ? (k >= t ? 'plan' : 'miss') : 'rest';
-    const name = { done: 'allenamento fatto', plan: 'allenamento previsto', miss: 'allenamento non fatto', rest: 'riposo' }[st];
-    const aria = `${fromKey(k).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}: ${name}`;
-    return `<button class="wk ${st}${k === t ? ' today' : ''}" data-act="wkday" data-k="${k}" aria-label="${esc(aria)}"><span class="wl">${l}</span><i class="wkd">${st === 'done' ? svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>') : ''}</i></button>`;
-  }).join('');
-  const ws = weightsSorted(), cur = ws[ws.length - 1], sn = streakDays();
-  const bits = [
-    cur ? `<span><b>${fmtN(cur.kg)}</b> kg</span>` : '',
-    `<span><b>${sn}</b> ${sn === 1 ? 'giorno' : 'giorni'} di fila</span>`,
-    planned ? `<span><b>${done}</b>/${planned} sedute</span>` : ''
-  ].filter(Boolean).join('');
-  return `<section class="weekcard" aria-label="Questa settimana"><div class="wkrow">${cells}</div><div class="wkstats">${bits}</div></section>`;
-}
 const EMPTY_ART = '<svg class="eart" viewBox="0 0 120 96" aria-hidden="true"><rect x="30" y="8" width="60" height="80" rx="10" class="e1"/><rect x="46" y="3" width="28" height="12" rx="6" class="e2"/><path d="M42 36h36M42 48h24M42 60h30" class="e3"/><g class="e4"><path d="M8 78v-14M14 74v-6M112 78v-14M106 74v-6M14 71h-6M106 71h6"/></g></svg>';
 function renderHome() {
   const k = todayKey(), d = dayRec(k), type = dayType(k), train = type === 'train';
@@ -434,7 +415,7 @@ function renderHome() {
     </button>`;
   const emptyCard = (!w.exercises.length && !isFree(w) && !trainedDays().length && !S.demo)
     ? `<section class="emptycard">${EMPTY_ART}<h2>Crea la tua scheda</h2><p>Aggiungi gli esercizi che fai: poi qui compaiono la settimana, i progressi e la modalità serie.</p><button class="btn solid wide" data-act="tab" data-tab="scheda">Crea la scheda</button></section>` : '';
-  const quick = `<section class="quick"><h3>Segna al volo</h3><div class="quick-row">
+  const quick = `<section class="quick"><h3>Segna al volo<span class="qlinks">${weighDue() && !ui.weighHide ? '<button class="qlink due" data-act="weigh">Pesata</button>' : ''}<button class="qlink" data-act="sw">Cronometro</button></span></h3><div class="quick-row">
       <button class="mini-toggle${d.quick.creatina ? ' on' : ''}" data-act="creatina" aria-pressed="${!!d.quick.creatina}">Creatina</button>
       ${meals.map(m => `<button class="mini-toggle${d.meals[m.id] ? ' on' : ''}${d.flags[m.id] ? ' ' + d.flags[m.id] : ''}" data-act="meal" data-id="${m.id}" aria-pressed="${!!d.meals[m.id]}">${esc(shortMeal(m))}</button>`).join('')}
     </div></section>`;
@@ -562,7 +543,7 @@ function exSummary(ex) {
   const load = m === 'bw' ? 'peso corporeo' : m === 'add' ? `corpo + ${fmtN(v.kg || 0)} kg` : (v.kg != null ? `${fmtN(v.kg)} kg` : 'corpo libero');
   return `${v.sets ?? '—'}×${v.reps ?? '—'} · ${load}${hasVars(ex) ? ` · ${ex.variants.length} varianti` : ''}`;
 }
-function renderScheda() {
+function renderSchedaBase() {
   const groupOpts = cur => D.groups.map(g => `<option value="${g[0]}"${g[0] === cur ? ' selected' : ''}>${g[1]}</option>`).join('');
   const nums = (kind, o, mode) => `<div class="nums">
       <label><span>Serie</span><input data-chg="${kind}" data-f="sets" inputmode="numeric" value="${o.sets ?? ''}"></label>
@@ -590,12 +571,13 @@ function renderScheda() {
             </div>`).join('')
           : nums('ex', ex, bwMode(ex))}
         <label class="sel"><span>Recupero tra le serie</span><select data-chg="ex" data-f="rest" aria-label="Recupero tra le serie">${restOpts(ex.rest)}</select></label>
+        ${ei < w.exercises.length - 1 ? `<label class="sel"><span>Superset con il successivo</span><select data-chg="ex" data-f="ss" aria-label="Superset con il successivo"><option value="0"${ex.ss ? '' : ' selected'}>No</option><option value="1"${ex.ss ? ' selected' : ''}>Sì, alterna le serie</option></select></label>` : ''}
         <label class="sel"><span>Carico</span><select data-chg="ex" data-f="bw" aria-label="Tipo di carico">${loadOpts(bwMode(ex))}</select></label>
         <input data-chg="ex" data-f="note" value="${esc(ex.note || '')}" placeholder="Nota (facoltativa)" aria-label="Nota">
         <button class="lnk" data-act="addvar">Aggiungi una variante</button>
         <button class="lnk danger" data-act="delex" aria-label="Elimina ${esc(ex.name)}">Elimina esercizio</button>
       </details>`).join('')}
-      <button class="btn" data-act="addex" data-w="${wi}">Aggiungi esercizio</button>
+      <div class="btns"><button class="btn" data-act="addex" data-w="${wi}">Aggiungi esercizio</button><button class="btn" data-act="wshare" data-w="${wi}">Condividi</button></div>
     </section>`).join('');
 }
 
@@ -978,7 +960,9 @@ const weightForm = cur => `<div class="inline"><label class="field"><input id="w
 const THEMES = [
   { id: 'apple', name: 'Apple-like', desc: 'Chiaro, con azzurro e card bianche, come nell\'anteprima della home.' },
   { id: 'dark', name: 'Scuro', desc: 'Sfondo scuro con il verde in evidenza, comodo la sera.' },
-  { id: 'sport', name: 'Sport', desc: 'Toni caldi, con arancio e rosso.' }
+  { id: 'sport', name: 'Sport', desc: 'Toni caldi, con arancio e rosso.' },
+  { id: 'oceano', name: 'Oceano', desc: 'Azzurro petrolio, fresco e pulito.' },
+  { id: 'forest', name: 'Foresta', desc: 'Verdi naturali, riposante.' }
 ];
 
 function previewHtml(id) {
@@ -1359,9 +1343,6 @@ function renderCalendario() {
   <div class="tiles">${tileHtml('Sedute', trainDays)}${tileHtml('Pasti seguiti', ad.mealsPct == null ? '—' : ad.mealsPct + '%')}${tileHtml('Sgarri', ad.slip)}</div>`;
 }
 
-function renderDiario() {
-  return `${renderCalendario()}<h2 class="sect">Ultime sedute</h2>${renderRegistro()}`;
-}
 
 /* ---------- schermata: Storico ---------- */
 function renderStorico() {
@@ -1507,17 +1488,14 @@ function renderRegistro() {
 }
 
 function renderDati() {
-  const th = (v, l) => `<option value="${v}"${S.settings.theme === v ? ' selected' : ''}>${l}</option>`;
   return `<section class="card"><h2>Preferenze</h2>
       <label class="setting"><span>Recupero tra le serie</span>
         <select data-chg="rest" aria-label="Secondi di recupero">${[...new Set([30, 45, 60, 75, 90, 105, 120, 150, 180, 240, 300, S.settings.rest])].sort((a, b) => a - b).map(s => `<option value="${s}"${S.settings.rest === s ? ' selected' : ''}>${recText(s)}</option>`).join('')}</select></label>
       <label class="setting"><span>Suono a fine recupero</span>
         <select data-chg="sound" aria-label="Suono a fine recupero"><option value="1"${S.settings.sound ? ' selected' : ''}>Attivo</option><option value="0"${S.settings.sound ? '' : ' selected'}>Disattivo</option></select></label>
       <div class="btns"><button class="btn" data-act="beeptest">Prova il suono</button></div>
-      <label class="setting"><span>Stile dell'app</span>
-        <select data-chg="theme" aria-label="Stile dell'app">${th('apple', 'Apple-like')}${th('dark', 'Scuro')}${th('sport', 'Sport')}</select></label>
-      <div class="btns"><button class="btn" data-act="stview" data-v="stili">Anteprima stili</button></div>
     </section>
+    ${aspettoCard()}${obiettiviCard()}
     <section class="card"><h2>Esporta in Excel</h2>
       <p class="sub tight">File CSV con il separatore punto e virgola e i decimali con la virgola, pronti da aprire in Excel.</p>
       <div class="btns"><button class="btn" data-act="csv" data-v="serie">Serie e allenamenti</button>
@@ -1545,8 +1523,8 @@ function render(keep) {
   const boot = $('#boot');
   if (boot) { boot.classList.add('gone'); setTimeout(() => boot.remove(), 400); }
   renderedDay = todayKey();
-  document.body.classList.remove('theme-apple', 'theme-dark', 'theme-sport');
-  document.body.classList.add(`theme-${S.settings.theme}`);
+  document.body.className = document.body.className.replace(/\b(theme|dens|shape)-\S+/g, '').trim();
+  document.body.classList.add(`theme-${S.settings.theme}`, `dens-${S.settings.look.dens}`, `shape-${S.settings.look.shape}`);
   if (!S.settings.welcomed || ui.tour) {
     $('#app').innerHTML = renderWelcome();
     document.body.dataset.view = 'welcome';
@@ -1741,7 +1719,7 @@ const A = {
   bought(el) { S.shop.bought[el.dataset.id] = !S.shop.bought[el.dataset.id]; save(); render(true); },
   have(el) { S.shop.have[el.dataset.id] = !S.shop.have[el.dataset.id]; save(); render(true); },
   clearbought() { S.shop.bought = {}; save(); render(true); },
-  settheme(el) { S.settings.theme = ['apple', 'dark', 'sport'].includes(el.dataset.v) ? el.dataset.v : 'apple'; save(); render(true); },
+  settheme(el) { S.settings.theme = THEME_IDS.includes(el.dataset.v) ? el.dataset.v : 'apple'; save(); render(true); },
   focus() { ui.focus = timer ? 'rest' : 'set'; render(false); },
   fclose() { ui.focus = null; render(true); },
   finish() { ui.focus = 'summary'; render(false); },
@@ -1770,7 +1748,9 @@ const A = {
     if (bwMode(nx.ex) !== 'bw' && r.kg && best.prev > 0 && r.kg > best.prev && r.kg > best.cur) toast(`Nuovo massimo: ${fmtN(r.kg)} kg su ${nx.name}`);
     ui.fLast = setsText([r]);
     save();
-    if (nextSet(k, w)) { startTimer(restFor(nx.ex)); ui.focus = 'rest'; } else { timer = null; ui.focus = 'summary'; }
+    const nx2 = nextSet(k, w);
+    if (nx2 && ssMid(w, nx.ex, nx2.ex)) { timer = null; ui.focus = 'set'; }
+    else if (nx2) { startTimer(restFor(nx.ex)); ui.focus = 'rest'; } else { timer = null; ui.focus = 'summary'; }
     render(false);
   },
   fskip() { timer = null; ui.focus = 'set'; render(false); },
@@ -1907,7 +1887,7 @@ const C = {
   rest(el) { S.settings.rest = +el.value; save(); },
   sound(el) { S.settings.sound = el.value === '1'; save(); if (S.settings.sound) beep(); },
   theme(el) {
-    S.settings.theme = ['apple', 'dark', 'sport'].includes(el.value) ? el.value : 'apple';
+    S.settings.theme = THEME_IDS.includes(el.value) ? el.value : 'apple';
     save(); render(true);
   },
   ex(el) {
@@ -1916,6 +1896,7 @@ const C = {
     if (f === 'name') ex.name = v || 'Esercizio';
     else if (f === 'note') ex.note = v;
     else if (f === 'group') ex.group = v;
+    else if (f === 'ss') { ex.ss = v === '1'; save(); render(true); return; }
     else if (f === 'rest') ex.rest = v ? +v : null;
     else if (f === 'bw') { ex.bw = v === 'bw' || v === 'add' ? v : 'off'; save(); render(true); return; }
     else if (f === 'kg') ex.kg = num(v);
@@ -2487,6 +2468,385 @@ Object.assign(A, {
 Object.assign(I, {
   freeq(el) { const r = $('#free-res'); if (r) r.innerHTML = freeResultsHtml(el.value); }
 });
+
+/* ================= 2.2: aspetto, obiettivi, riepilogo, ricerca, cronometro, pesata, superset, condivisione, promemoria ================= */
+const WEEK_LABELS = { dots: 'Pallini', barre: 'Barre', mese: 'Mese', anelli: 'Anelli', minimal: 'Minimale' };
+const DENS_LABELS = { comoda: 'Comoda', compatta: 'Compatta' };
+const SHAPE_LABELS = { tonde: 'Tonde', quadrate: 'Quadrate', piatte: 'Piatte' };
+const THEME_LABELS = { apple: 'Apple-like', dark: 'Scuro', sport: 'Sport', oceano: 'Oceano', forest: 'Foresta' };
+
+function weekData() {
+  const t = todayKey(), mon = addDays(t, -wdIndex(fromKey(t)));
+  const days = ['L', 'M', 'M', 'G', 'V', 'S', 'D'].map((l, i) => {
+    const k = addDays(mon, i), train = dayType(k) === 'train', dn = hasDone(S.days[k]);
+    const st = dn ? 'done' : train ? (k >= t ? 'plan' : 'miss') : 'rest';
+    return { k, l, st, train, dn, vol: dn ? sessionVolume(S.days[k]).vol : 0 };
+  });
+  return { t, mon, days, planned: days.filter(d => d.train).length, done: days.filter(d => d.dn).length };
+}
+function stDesc(d) {
+  const name = { done: 'allenamento fatto', plan: 'allenamento previsto', miss: 'allenamento non fatto', rest: 'riposo' }[d.st];
+  return `${fromKey(d.k).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}: ${name}`;
+}
+function weekBits(wd) {
+  const ws = weightsSorted(), cur = ws[ws.length - 1], sn = streakDays(), g = S.settings.goals;
+  const tgt = g.sessions || wd.planned;
+  const e = eatenNutrition(S.days[wd.t], dayType(wd.t));
+  const gs = goalStreakWeeks();
+  return [
+    cur ? `<span><b>${fmtN(cur.kg)}</b> kg</span>` : '',
+    `<span><b>${sn}</b> ${sn === 1 ? 'giorno' : 'giorni'} di fila</span>`,
+    tgt ? `<span><b>${wd.done}</b>/${tgt} sedute</span>` : '',
+    g.protein ? `<span><b>${fmtInt(e.p)}</b>/${g.protein} g prot.</span>` : '',
+    gs > 1 ? `<span><b>${gs}</b> settimane obiettivo</span>` : ''
+  ].filter(Boolean).join('');
+}
+function goalStreakWeeks() {
+  const g = S.settings.goals.sessions;
+  if (!g) return 0;
+  const t = todayKey();
+  let mon = addDays(t, -wdIndex(fromKey(t))), n = 0;
+  const cnt = m => { let c = 0; for (let i = 0; i < 7; i++) if (hasDone(S.days[addDays(m, i)])) c++; return c; };
+  if (cnt(mon) >= g) n++;
+  mon = addDays(mon, -7);
+  while (n < 520 && cnt(mon) >= g) { n++; mon = addDays(mon, -7); }
+  return n;
+}
+function wkBtn(d, t, inner, cls) {
+  return `<button class="${cls} ${d.st}${d.k === t ? ' today' : ''}" data-act="wkday" data-k="${d.k}" aria-label="${esc(stDesc(d))}">${inner}</button>`;
+}
+function weekDots() {
+  const wd = weekData();
+  const cells = wd.days.map(d => wkBtn(d, wd.t, `<span class="wl">${d.l}</span><i class="wkd">${d.st === 'done' ? svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>') : ''}</i>`, 'wk')).join('');
+  return `<section class="weekcard wk-dots" aria-label="Questa settimana"><div class="wkrow">${cells}</div><div class="wkstats">${weekBits(wd)}</div></section>`;
+}
+function weekBars() {
+  const wd = weekData(), mx = Math.max(1, ...wd.days.map(d => d.vol));
+  const cells = wd.days.map(d => {
+    const h = d.dn ? Math.max(14, Math.round(d.vol / mx * 100)) : (d.train ? 14 : 6);
+    return wkBtn(d, wd.t, `<i class="wbar" style="height:${h}%"></i><span class="wl">${d.l}</span>`, 'wk wkb');
+  }).join('');
+  return `<section class="weekcard wk-bars" aria-label="Questa settimana, volume per giorno"><div class="wkrow">${cells}</div><div class="wkstats">${weekBits(wd)}</div></section>`;
+}
+function weekMonth() {
+  const t = todayKey(), mon = addDays(t, -wdIndex(fromKey(t))), start = addDays(mon, -21);
+  const cells = [];
+  for (let i = 0; i < 28; i++) {
+    const k = addDays(start, i), train = dayType(k) === 'train', dn = hasDone(S.days[k]);
+    const st = dn ? 'done' : train ? (k >= t ? 'plan' : 'miss') : 'rest';
+    cells.push(`<button class="wm ${st}${k === t ? ' today' : ''}" data-act="wkday" data-k="${k}" aria-label="${esc(stDesc({ k, st }))}"></button>`);
+  }
+  const wd = weekData();
+  return `<section class="weekcard wk-month" aria-label="Ultime quattro settimane"><div class="wmgrid">${cells.join('')}</div><div class="wkstats">${weekBits(wd)}</div></section>`;
+}
+function ringSvg(p, label, val, cls) {
+  const R = 20, C = 2 * Math.PI * R, f = Math.max(0, Math.min(1, p));
+  return `<div class="rg ${cls}"><svg viewBox="0 0 50 50" aria-hidden="true"><circle cx="25" cy="25" r="${R}" class="rgb"/><circle cx="25" cy="25" r="${R}" class="rgf" stroke-dasharray="${(C * f).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 25 25)"/></svg><b>${val}</b><small>${label}</small></div>`;
+}
+function weekRings() {
+  const wd = weekData(), g = S.settings.goals, tgt = g.sessions || wd.planned || 1;
+  const t = wd.t, type = dayType(t), meals = D.diet[type].meals, rec = S.days[t];
+  const md = meals.filter(m => rec && rec.meals && rec.meals[m.id]).length;
+  const e = eatenNutrition(rec, type), gp = g.protein || e.goalP || 1;
+  return `<section class="weekcard wk-rings" aria-label="Anelli di oggi e della settimana"><div class="rgrow">
+    ${ringSvg(wd.done / tgt, 'sedute', `${wd.done}/${tgt}`, 'r1')}
+    ${ringSvg(meals.length ? md / meals.length : 0, 'pasti oggi', `${md}/${meals.length}`, 'r2')}
+    ${ringSvg(e.p / gp, 'proteine', `${fmtInt(e.p)}`, 'r3')}</div></section>`;
+}
+function weekMin() {
+  const wd = weekData(), g = S.settings.goals, tgt = g.sessions || wd.planned || 1, sn = streakDays();
+  const p = Math.min(100, Math.round(wd.done / tgt * 100));
+  return `<section class="weekcard wk-min" aria-label="Questa settimana"><p><b>${wd.done}</b> di ${tgt} sedute · <b>${sn}</b> ${sn === 1 ? 'giorno' : 'giorni'} di fila</p><div class="wkbar"><i style="width:${p}%"></i></div></section>`;
+}
+function weekStrip() {
+  return ({ dots: weekDots, barre: weekBars, mese: weekMonth, anelli: weekRings, minimal: weekMin }[S.settings.look.week] || weekDots)();
+}
+
+/* ---- riepilogo settimanale e ricerca nel Diario ---- */
+function weekSummaryData(mon) {
+  const t = todayKey(); let sets = 0, vol = 0, sess = 0, mealsDone = 0, mealsTot = 0, creat = 0;
+  const wts = [];
+  for (let i = 0; i < 7; i++) {
+    const k = addDays(mon, i);
+    if (k > t) break;
+    const rec = S.days[k];
+    if (hasDone(rec)) { sess++; const sv = sessionVolume(rec); sets += sv.sets; vol += sv.vol; }
+    if (rec) {
+      const ml = D.diet[dayType(k)].meals;
+      mealsTot += ml.length; mealsDone += ml.filter(m => rec.meals && rec.meals[m.id]).length;
+      if (rec.quick && rec.quick.creatina) creat++;
+    }
+    const w = S.weights.find(x => x.d === k); if (w) wts.push(w.kg);
+  }
+  return { sets, vol, sess, mealsDone, mealsTot, creat, wFrom: wts[0], wTo: wts[wts.length - 1] };
+}
+function renderSettimana() {
+  const t = todayKey(), off = Math.min(0, ui.wkOff || 0);
+  const mon = addDays(addDays(t, -wdIndex(fromKey(t))), off * 7), sun = addDays(mon, 6);
+  const r = weekSummaryData(mon), g = S.settings.goals.sessions;
+  const lab = `${fromKey(mon).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })} – ${fromKey(sun).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}`;
+  const rows = [
+    `<li>Sedute<span>${r.sess}${g ? ' di ' + g : ''}</span></li>`,
+    `<li>Serie e volume<span>${r.sets} serie · ${fmtInt(r.vol)} kg</span></li>`,
+    `<li>Pasti seguiti<span>${r.mealsDone} di ${r.mealsTot}</span></li>`,
+    r.creat ? `<li>Creatina<span>${r.creat} ${r.creat === 1 ? 'giorno' : 'giorni'}</span></li>` : '',
+    r.wTo != null ? `<li>Peso<span>${r.wFrom !== r.wTo ? fmtN(r.wFrom) + ' → ' : ''}${fmtN(r.wTo)} kg</span></li>` : ''
+  ].join('');
+  return `<section class="card wsum"><div class="wsum-h"><button class="calnav" data-act="wknav" data-d="-1" aria-label="Settimana precedente">${svg('<path d="M15 6l-6 6 6 6"/>')}</button><h2>${off === 0 ? 'Questa settimana' : esc(lab)}</h2><button class="calnav" data-act="wknav" data-d="1" aria-label="Settimana successiva"${off >= 0 ? ' disabled' : ''}>${svg('<path d="M9 6l6 6-6 6"/>')}</button></div>
+    <p class="sub tight">${esc(lab)}</p><ul class="wsum-l">${rows}</ul>
+    <input data-inp="wknote" data-k="${mon}" value="${esc((S.weekNotes || {})[mon] || '')}" placeholder="Nota della settimana (facoltativa)" aria-label="Nota della settimana"></section>`;
+}
+function diarioSearch(q) {
+  q = q.trim().toLowerCase();
+  if (q.length < 2) return '';
+  const out = [];
+  Object.keys(S.days).sort().reverse().forEach(k => {
+    const rec = S.days[k]; if (!rec) return;
+    const hits = [];
+    const hay = [];
+    Object.keys(rec.names || {}).forEach(key => { if (rec.sets && rec.sets[key]) hay.push(['Esercizio', rec.names[key]]); });
+    Object.keys(rec.exnote || {}).forEach(key => hay.push(['Nota', rec.exnote[key]]));
+    if (rec.note) hay.push(['Nota', rec.note]);
+    Object.keys(rec.slip || {}).forEach(id => hay.push(['Sgarro', rec.slip[id]]));
+    const w = wOf(rec); if (w && hasDone(rec)) hay.push(['Allenamento', w.name]);
+    hay.forEach(([l, v]) => { if (v && String(v).toLowerCase().includes(q) && !hits.some(h => h[1] === v)) hits.push([l, v]); });
+    const dl = longDate(k).toLowerCase();
+    if (!hits.length && (dl.includes(q) || k.includes(q))) hits.push(['Giorno', longDate(k)]);
+    if (hits.length) out.push({ k, hits });
+  });
+  if (!out.length) return '<p class="empty">Nessun risultato.</p>';
+  return `<section class="card" style="padding-top:4px"><ul class="srch">${out.slice(0, 30).map(o => `<li><button class="srow" data-act="wkday" data-k="${o.k}"><b>${esc(fmtShortWd(o.k))}</b><span>${o.hits.slice(0, 3).map(h => esc(h[0] + ': ' + h[1])).join(' · ')}</span></button></li>`).join('')}</ul>${out.length > 30 ? '<p class="sub tight">Mostro i primi 30 risultati.</p>' : ''}</section>`;
+}
+function renderDiario() {
+  return `${renderSettimana()}${renderCalendario()}
+    <h2 class="sect">Cerca</h2>
+    <input type="search" class="dsearch" data-inp="dsearch" value="${esc(ui.dq || '')}" placeholder="Esercizio, nota, giorno…" aria-label="Cerca nel diario" enterkeyhint="search">
+    <div id="dsres">${diarioSearch(ui.dq || '')}</div>
+    <h2 class="sect">Ultime sedute</h2>${renderRegistro()}`;
+}
+
+/* ---- cronometro libero ---- */
+const SW = { mode: 'up', run: false, t0: 0, acc: 0, target: 60, fired: false, iv: null };
+function swMs() { const ms = SW.acc + (SW.run ? Date.now() - SW.t0 : 0); return SW.mode === 'up' ? ms : Math.max(0, SW.target * 1000 - ms); }
+function swText() { const s = Math.floor(swMs() / 1000), m = Math.floor(s / 60); return `${pad(m)}:${pad(s % 60)}`; }
+function swSheetHtml() {
+  const pre = [30, 60, 90, 120, 180, 300];
+  return `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="swt"><h2 id="swt">Cronometro</h2>
+    <div class="seg small"><button data-act="swmode" data-v="up" class="${SW.mode === 'up' ? 'on' : ''}">Cronometro</button><button data-act="swmode" data-v="down" class="${SW.mode === 'down' ? 'on' : ''}">Conto alla rovescia</button></div>
+    <p class="swtime" id="swtime" role="timer">${swText()}</p>
+    ${SW.mode === 'down' ? `<div class="chips">${pre.map(s => `<button class="chip${SW.target === s ? ' on' : ''}" data-act="swtarget" data-v="${s}">${recText(s)}</button>`).join('')}</div>` : ''}
+    <div class="sheet-btns"><button class="btn solid" data-act="swgo">${SW.run ? 'Pausa' : 'Avvia'}</button><button class="btn" data-act="swreset">Azzera</button><button class="btn" data-act="swclose">Chiudi</button></div></div>`;
+}
+function swTick() {
+  const el = $('#swtime'); if (el) el.textContent = swText();
+  if (SW.run && SW.mode === 'down' && swMs() <= 0 && !SW.fired) {
+    SW.fired = true; SW.run = false; SW.acc = SW.target * 1000;
+    if (S.settings.sound) beep();
+    if (askKind === 'sw') { askEl.innerHTML = swSheetHtml(); }
+  }
+  if (!SW.run && SW.iv) { clearInterval(SW.iv); SW.iv = null; }
+}
+
+/* ---- pesata ---- */
+function weighDue() {
+  const wdy = S.settings.weighDay;
+  if (wdy < 0 || S.demo || !S.settings.welcomed) return false;
+  const t = todayKey();
+  if (wdIndex(fromKey(t)) < wdy) return false;
+  return !S.weights.some(w => w.d > addDays(t, -6) && w.d <= t);
+}
+
+/* ---- superset ---- */
+function exBlocks(w) {
+  const out = []; let cur = [];
+  w.exercises.forEach((ex, i) => { cur.push(ex); if (!(ex.ss && i < w.exercises.length - 1)) { out.push(cur); cur = []; } });
+  if (cur.length) out.push(cur);
+  return out;
+}
+function nextSet(k, w) {
+  for (const blk of exBlocks(w)) {
+    const info = blk.map(ex => { const v = selVariant(k, ex), p = plan(ex, v), key = skey(ex, v); return { ex, v, p, key, n: rowCount(k, key, p), arr: getSets(k, key) }; });
+    const max = Math.max(0, ...info.map(x => x.n));
+    for (let i = 0; i < max; i++) for (const x of info) if (i < x.n && !(x.arr[i] && x.arr[i].done)) return { name: x.p.name, i, ex: x.ex, v: x.v, key: x.key, p: x.p };
+  }
+  return null;
+}
+function ssMid(w, a, b) {
+  for (const blk of exBlocks(w)) { const ia = blk.indexOf(a), ib = blk.indexOf(b); if (ia >= 0 && ib > ia) return true; }
+  return false;
+}
+
+/* ---- condividi / importa una scheda ---- */
+function cleanStr(s, n) { return String(s ?? '').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, n); }
+function cleanNum(v, lo, hi) { const n = typeof v === 'number' ? v : num(String(v ?? '')); return n == null || !isFinite(n) ? null : Math.min(hi, Math.max(lo, n)); }
+function cleanEx(e) {
+  if (!e || typeof e !== 'object') return null;
+  const gids = D.groups.map(g => g[0]);
+  const o = { id: uid(), name: cleanStr(e.name, 60) || 'Esercizio', group: gids.includes(e.group) ? e.group : 'altro' };
+  if (Array.isArray(e.variants) && e.variants.length) {
+    o.variants = e.variants.slice(0, 8).map(v => ({ name: cleanStr(v && v.name, 60) || 'Variante', sets: cleanNum(v && v.sets, 1, 20), reps: cleanNum(v && v.reps, 1, 200), kg: cleanNum(v && v.kg, 0, 1000) }));
+  } else { o.sets = cleanNum(e.sets, 1, 20); o.reps = cleanNum(e.reps, 1, 200); o.kg = cleanNum(e.kg, 0, 1000); }
+  const r = cleanNum(e.rest, 10, 900); if (r) o.rest = Math.round(r);
+  if (['bw', 'add'].includes(e.bw)) o.bw = e.bw;
+  if (e.note) o.note = cleanStr(e.note, 200);
+  if (e.ss) o.ss = true;
+  return o;
+}
+function cleanWorkout(w) {
+  if (!w || typeof w !== 'object' || !Array.isArray(w.exercises)) return null;
+  const ex = w.exercises.slice(0, 40).map(cleanEx).filter(Boolean);
+  if (!ex.length) return null;
+  ex[ex.length - 1].ss = false;
+  return { id: 'w' + uid(), name: cleanStr(w.name, 60) || 'Scheda importata', exercises: ex };
+}
+function wPayload(w) { return { app: 'palestra', v: 1, workout: { name: w.name, exercises: w.exercises.map(e => { const c = clone(e); delete c.id; return c; }) } }; }
+function wCode(w) { return 'PAL1:' + btoa(unescape(encodeURIComponent(JSON.stringify(wPayload(w))))); }
+function parseWorkoutText(t) {
+  t = String(t || '').trim();
+  if (t.startsWith('PAL1:')) t = decodeURIComponent(escape(atob(t.slice(5).replace(/\s+/g, ''))));
+  const j = JSON.parse(t);
+  return cleanWorkout(j && j.workout ? j.workout : null);
+}
+function importWorkoutText(t) {
+  let w = null;
+  try { w = parseWorkoutText(t); } catch (e) { w = null; }
+  if (!w) { toast('Scheda non valida: controlla il file o il codice'); return false; }
+  snapUndo(); S.workouts.push(w); save(); closeAsk(); render(true);
+  toast(`Scheda “${w.name}” aggiunta`, 'Annulla');
+  return true;
+}
+
+/* ---- promemoria sul Calendario (.ics) ---- */
+const ICS_DAYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
+const icsEsc = s => String(s).replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+function parseHM(s) { const m = /^(\d{1,2})[:.](\d{2})/.exec(String(s || '')); return m && +m[1] < 24 && +m[2] < 60 ? [+m[1], +m[2]] : null; }
+function buildIcs() {
+  const r = S.settings.rem, t = todayKey(), stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const ev = [];
+  const add = (id, title, hm, idxs, desc) => {
+    if (!hm || !idxs.length) return;
+    let k = t; for (let i = 0; i < 7 && !idxs.includes(wdIndex(fromKey(k))); i++) k = addDays(k, 1);
+    ev.push(['BEGIN:VEVENT', `UID:pal-${id}@palestra`, `DTSTAMP:${stamp}`, `DTSTART:${k.replace(/-/g, '')}T${pad(hm[0])}${pad(hm[1])}00`, `DURATION:PT${id === 'train' ? 60 : 15}M`,
+      `RRULE:FREQ=WEEKLY;BYDAY=${idxs.map(i => ICS_DAYS[i]).join(',')}`, `SUMMARY:${icsEsc(title)}`, desc ? `DESCRIPTION:${icsEsc(desc)}` : '',
+      'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${icsEsc(title)}`, 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT'].filter(Boolean));
+  };
+  const trainIdx = [0, 1, 2, 3, 4, 5, 6].filter(i => S.week[i] === 'train'), restIdx = [0, 1, 2, 3, 4, 5, 6].filter(i => S.week[i] !== 'train');
+  if (r.trainOn) add('train', 'Allenamento', parseHM(r.train), trainIdx, 'Apri Palestra per la scheda di oggi.');
+  if (r.weighOn && S.settings.weighDay >= 0) add('weigh', 'Pesata', parseHM(r.weigh), [S.settings.weighDay], 'Segna il peso su Palestra.');
+  if (r.creaOn) add('crea', 'Creatina', parseHM(r.crea), [0, 1, 2, 3, 4, 5, 6], '');
+  if (r.mealsOn) ['train', 'rest'].forEach(type => {
+    (type === 'train' ? trainIdx : restIdx).length && D.diet[type].meals.forEach(m => add(`m-${type}-${m.id}`, m.name, parseHM(m.time), type === 'train' ? trainIdx : restIdx, ''));
+  });
+  if (!ev.length) return null;
+  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Palestra//IT', 'CALSCALE:GREGORIAN', 'X-WR-CALNAME:Palestra', ...ev.flat(), 'END:VCALENDAR'].join('\r\n') + '\r\n';
+}
+
+/* ---- gestori nuovi ---- */
+Object.assign(A, {
+  lookset(el) {
+    const f = el.dataset.f, v = el.dataset.v, ok = { week: Object.keys(WEEK_LABELS), dens: Object.keys(DENS_LABELS), shape: Object.keys(SHAPE_LABELS) };
+    if (ok[f] && ok[f].includes(v)) { S.settings.look[f] = v; save(); render(true); }
+  },
+  wknav(el) { ui.wkOff = Math.min(0, (ui.wkOff || 0) + +el.dataset.d); render(true); },
+  sw() { openAsk('sw', swSheetHtml()); },
+  swmode(el) { SW.mode = el.dataset.v === 'down' ? 'down' : 'up'; SW.run = false; SW.acc = 0; SW.fired = false; askEl.innerHTML = swSheetHtml(); },
+  swtarget(el) { SW.target = +el.dataset.v; SW.run = false; SW.acc = 0; SW.fired = false; askEl.innerHTML = swSheetHtml(); },
+  swgo() {
+    if (SW.run) { SW.acc += Date.now() - SW.t0; SW.run = false; }
+    else { if (SW.mode === 'down' && swMs() <= 0) { SW.acc = 0; SW.fired = false; } SW.t0 = Date.now(); SW.run = true; if (!SW.iv) SW.iv = setInterval(swTick, 250); }
+    askEl.innerHTML = swSheetHtml();
+  },
+  swreset() { SW.run = false; SW.acc = 0; SW.fired = false; askEl.innerHTML = swSheetHtml(); },
+  swclose() { closeAsk(); },
+  weigh() {
+    const ws = weightsSorted(), cur = ws[ws.length - 1];
+    openAsk('weigh', `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="wht"><h2 id="wht">Pesata di oggi</h2>
+      <input id="wh-kg" inputmode="decimal" placeholder="Peso in kg" value="${cur ? fmtN(cur.kg) : ''}" aria-label="Peso in kg">
+      <div class="sheet-btns"><button class="btn solid" data-act="weighsave">Salva</button><button class="btn" data-act="weighlater">Più tardi</button></div></div>`);
+  },
+  weighsave() {
+    const kg = num($('#wh-kg').value);
+    if (kg == null || kg < 20 || kg > 400) return toast('Inserisci un peso valido');
+    const t = todayKey(), ex = S.weights.find(w => w.d === t);
+    if (ex) ex.kg = kg; else S.weights.push({ d: t, kg });
+    save(); closeAsk(); render(true); toast(`Peso salvato: ${fmtN(kg)} kg`);
+  },
+  weighlater() { ui.weighHide = true; closeAsk(); render(true); },
+  wshare(el) {
+    const w = S.workouts[+el.dataset.w]; if (!w) return;
+    openAsk('share', `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sht"><h2 id="sht">Condividi “${esc(w.name)}”</h2>
+      <p class="sub tight">Chi la riceve può importarla da Scheda → Importa una scheda.</p>
+      <div class="sheet-btns"><button class="btn solid" data-act="wsfile" data-w="${+el.dataset.w}">Invia il file</button><button class="btn" data-act="wscode" data-w="${+el.dataset.w}">Copia il codice</button><button class="btn" data-act="swclose">Chiudi</button></div></div>`);
+  },
+  wsfile(el) {
+    const w = S.workouts[+el.dataset.w]; if (!w) return;
+    const text = JSON.stringify(wPayload(w), null, 1), name = `scheda-${cleanStr(w.name, 30).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'palestra'}.json`;
+    try {
+      const f = new File([text], name, { type: 'application/json' });
+      if (navigator.canShare && navigator.canShare({ files: [f] })) { navigator.share({ files: [f], title: w.name }).catch(() => {}); closeAsk(); return; }
+    } catch (e) { /* ripiego sul download */ }
+    download(name, text, 'application/json'); closeAsk(); toast('File della scheda salvato');
+  },
+  wscode(el) { const w = S.workouts[+el.dataset.w]; if (w) { copyText(wCode(w), 'Codice copiato'); closeAsk(); } },
+  wcodeask() {
+    openAsk('wcode', `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="wct"><h2 id="wct">Incolla il codice</h2>
+      <textarea id="wc-txt" rows="4" placeholder="PAL1:…" aria-label="Codice della scheda"></textarea>
+      <div class="sheet-btns"><button class="btn solid" data-act="wcodego">Importa</button><button class="btn" data-act="swclose">Annulla</button></div></div>`);
+  },
+  wcodego() { importWorkoutText($('#wc-txt').value); },
+  icsget() {
+    const t = buildIcs();
+    if (!t) return toast('Attiva almeno un promemoria');
+    download('palestra-promemoria.ics', t, 'text/calendar'); toast('Apri il file per aggiungerli al Calendario');
+  }
+});
+Object.assign(C, {
+  goal(el) { const g = S.settings.goals; g[el.dataset.f] = Math.max(0, +el.value || 0); save(); render(true); },
+  weighday(el) { S.settings.weighDay = Math.max(-1, Math.min(6, +el.value)); save(); render(true); },
+  rem(el) {
+    const r = S.settings.rem, f = el.dataset.f;
+    if (el.type === 'checkbox') r[f] = el.checked; else if (parseHM(el.value)) r[f] = el.value;
+    save();
+  },
+  wimport(el) {
+    const f = el.files && el.files[0]; if (!f) return;
+    if (f.size > 500000) { toast('File troppo grande'); el.value = ''; return; }
+    const rd = new FileReader();
+    rd.onload = () => { importWorkoutText(String(rd.result)); el.value = ''; };
+    rd.readAsText(f);
+  }
+});
+Object.assign(I, {
+  wknote(el) { S.weekNotes ||= {}; const v = el.value.trim().slice(0, 300); if (v) S.weekNotes[el.dataset.k] = v; else delete S.weekNotes[el.dataset.k]; save(); },
+  dsearch(el) { ui.dq = el.value; const r = $('#dsres'); if (r) r.innerHTML = diarioSearch(ui.dq); }
+});
+function aspettoCard() {
+  const grp = (f, labels, label) => `<div class="lookgrp"><span>${label}</span><div class="chips">${Object.keys(labels).map(id => `<button class="chip${S.settings.look[f] === id ? ' on' : ''}" data-act="lookset" data-f="${f}" data-v="${id}" aria-pressed="${S.settings.look[f] === id}">${labels[id]}</button>`).join('')}</div></div>`;
+  return `<section class="card"><h2>Aspetto</h2>
+    <label class="setting"><span>Colori</span><select data-chg="theme" aria-label="Colori dell'app">${THEME_IDS.map(id => `<option value="${id}"${S.settings.theme === id ? ' selected' : ''}>${THEME_LABELS[id]}</option>`).join('')}</select></label>
+    ${grp('week', WEEK_LABELS, 'Settimana in Home')}${grp('dens', DENS_LABELS, 'Densità')}${grp('shape', SHAPE_LABELS, 'Forma delle card')}
+    <div class="btns"><button class="btn" data-act="stview" data-v="stili">Anteprima stili</button></div></section>`;
+}
+function obiettiviCard() {
+  const g = S.settings.goals, r = S.settings.rem;
+  const sel = (f, vals, cur, fmt) => `<select data-chg="goal" data-f="${f}" aria-label="${f}">${vals.map(v => `<option value="${v}"${cur === v ? ' selected' : ''}>${fmt(v)}</option>`).join('')}</select>`;
+  const chk = (f, l, tf) => `<label class="setting"><span>${l}</span><span class="remrow"><input type="checkbox" data-chg="rem" data-f="${f}"${r[f] ? ' checked' : ''} aria-label="${l}">${tf ? `<input type="time" data-chg="rem" data-f="${tf}" value="${esc(r[tf])}" aria-label="Ora: ${l}">` : ''}</span></label>`;
+  return `<section class="card"><h2>Obiettivi</h2>
+    <label class="setting"><span>Sedute a settimana</span>${sel('sessions', [0, 1, 2, 3, 4, 5, 6, 7], g.sessions, v => v ? String(v) : 'Come da piano')}</label>
+    <label class="setting"><span>Proteine al giorno</span>${sel('protein', [0, 80, 100, 120, 140, 160, 180, 200], g.protein, v => v ? v + ' g' : 'Non mostrare')}</label>
+    <label class="setting"><span>Giorno della pesata</span><select data-chg="weighday" aria-label="Giorno della pesata"><option value="-1"${S.settings.weighDay < 0 ? ' selected' : ''}>Mai</option>${DAYS_FULL.map((d, i) => `<option value="${i}"${S.settings.weighDay === i ? ' selected' : ''}>${d}</option>`).join('')}</select></label>
+  </section>
+  <section class="card"><h2>Promemoria</h2>
+    <p class="sub tight">Su iPhone una web app non può inviare notifiche. Scarica un file per il Calendario: gli eventi si ripetono ogni settimana con un avviso.</p>
+    ${chk('trainOn', 'Allenamento', 'train')}${chk('weighOn', 'Pesata', 'weigh')}${chk('creaOn', 'Creatina', 'crea')}${chk('mealsOn', 'Pasti agli orari del piano', null)}
+    <div class="btns"><button class="btn solid" data-act="icsget">Scarica per il Calendario</button></div></section>`;
+}
+
+function importCard() {
+  return `<section class="card"><h2>Importa una scheda</h2><p class="sub tight">Da un file o da un codice che ti ha inviato qualcuno.</p>
+    <div class="btns"><label class="btn">Da file<input type="file" accept="application/json,.json" data-chg="wimport" hidden></label><button class="btn" data-act="wcodeask">Incolla un codice</button></div></section>`;
+}
+function renderScheda() { return renderSchedaBase() + importCard(); }
 
 /* ---------- avvio ---------- */
 render(false);

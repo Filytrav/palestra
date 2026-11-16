@@ -3,7 +3,28 @@
 > **Nota: ad ogni aggiornamento della app, aggiornare questo file.**
 > Aggiungi in cima una nuova sezione con numero di versione, data e l'elenco di cosa è stato aggiunto, cambiato o corretto. Le versioni più recenti stanno in alto.
 
-Versione attuale: **2.1.1**
+Versione attuale: **2.2**
+
+---
+
+## Versione 2.2 (15/11/2026)
+
+Aspetto (Dati → Aspetto)
+- **5 stili della settimana in Home**: pallini (come prima), barre del volume giornaliero, ultime 4 settimane, anelli (sedute, pasti, proteine), minimale.
+- **Colori**: due nuovi, Oceano e Foresta, oltre ad Apple-like, Scuro e Sport.
+- **Densità** comoda o compatta e **forma delle card** tonde, quadrate o piatte.
+
+Funzioni nuove
+- **Obiettivi**: sedute a settimana e proteine al giorno (stima), mostrati nella settimana; conta anche le settimane di fila in cui raggiungi l'obiettivo.
+- **Riepilogo settimanale** in cima al Diario (sedute, serie, volume, pasti, creatina, peso) con navigazione tra le settimane e una nota per settimana.
+- **Cerca nel Diario**: esercizi, note, sgarri, nome dell'allenamento, date.
+- **Cronometro** libero e conto alla rovescia (con suono) dal tasto "Cronometro" in "Segna al volo".
+- **Pesata settimanale**: scegli il giorno; se non hai pesi negli ultimi 6 giorni compare "Pesata" in Home.
+- **Superset**: in Scheda, dentro l'esercizio, "Superset con il successivo". In modalità serie le serie si alternano e il recupero parte solo a fine giro.
+- **Condividi una scheda**: file o codice "PAL1:"; **Importa una scheda** da file o codice (i dati vengono ripuliti e si crea una scheda nuova).
+- **Promemoria nel Calendario**: file .ics con eventi settimanali e avviso (allenamento, pesata, creatina, pasti). Le notifiche vere non sono possibili da una web app su iPhone.
+
+Non incluso: import da Strava / Apple Fitness (resta nei punti aperti).
 
 ---
 

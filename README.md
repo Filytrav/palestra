@@ -41,3 +41,7 @@ Home con settimana, scheda a card con riordino, icone nella dieta, grafici con r
 
 ## 2.1
 Cambio ordine degli esercizi (anche in modalità serie) e allenamento libero. Punti aperti: vedi VERSIONI.md.
+
+
+## 2.2
+Aspetto personalizzabile (5 stili settimana, 5 colori, densità, forme), obiettivi, riepilogo settimanale, ricerca nel Diario, cronometro, pesata, superset, condivisione schede, promemoria .ics.
